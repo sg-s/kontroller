@@ -19,7 +19,7 @@
 % 5. click on "configure controls". you should have vectors corresponding
 % to the control singals you want to write in your workspace. choose which
 % vector is written to which channel. Call the entire set with a certain
-% name, and click "DONE". Close the window if youre done adding control
+% name, and click "DONE". Close the window if you're done adding control
 % paradigms. 
 % 6. Set an appropriate sampling rate. default is 1kHz. 
 % 7. Choose the file you want to output data to. Data will be stored as a
@@ -162,7 +162,7 @@ else
 end
 % check for strkat
 try
-    strkat('Checking for ','strkat.m..')
+    strkat('Checking for ','strkat.m..');
 catch
     error('Kontroller needs <a href="https://sourceforge.net/projects/daqkontroller/">strkat.m</a> to run, which was not detected.')
 

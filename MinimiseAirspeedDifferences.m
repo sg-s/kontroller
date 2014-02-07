@@ -131,3 +131,7 @@ end
 ControlParadigm = make_dilution_controls(300,PulseDuration,CorrectionFactor);
 savename = strcat(date,'_Kontroller_Paradigm_AutoTuned_300_200ms.mat');
 save(savename,'ControlParadigm');
+% also make a 3-second long version
+ControlParadigm = make_dilution_controls(300,3,CorrectionFactor);
+savename = strcat(date,'_Kontroller_Paradigm_AutoTuned_300_3s.mat');
+save(savename,'ControlParadigm');
