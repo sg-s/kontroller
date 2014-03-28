@@ -696,7 +696,7 @@ end
                   UsedInputChannels = [UsedInputChannels i];
 
                   InputChannelNames{i} = get(li(i),'String');
-                  keyboard                  InputChannelRanges(i) = str2double(get(lir(i),'String'));
+                  InputChannelRanges(i) = str2double(get(lir(i),'String'));
                   % check if it is a ground channel
                   if strcmp(get(li(i),'String'),'Ground')
                       set(li(i),'ForegroundColor','g')
