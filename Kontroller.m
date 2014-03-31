@@ -38,6 +38,7 @@
 % 2. The DAQ toolbox
 % 3. strkat.m, which is available with this file.
 % 4. oval.m
+% 5. PrettyFig.m
 %
 % ===Known issues in this version===
 %
@@ -147,7 +148,7 @@
 
 
 function [data] = Kontroller(gui,ControlParadigm,RunTheseParadigms,w)
-VersionName= 'Kontroller v0.6.5';
+VersionName= 'Kontroller v0.6.6';
 %% check for MATLAB dependencies
 v = ver;
 v = struct2cell(v);
@@ -1191,7 +1192,7 @@ end
             set(gca,'XLim',[0 max(t)])
             title(ocn{vi},'FontSize',20)
         end
-    
+        PrettyFig('EqualiseY =1;','fs=18;')
         
     end
 
