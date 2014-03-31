@@ -1,7 +1,7 @@
 % Kontroller.m
 % created by  <a href="http://srinivas.gs/">srinivas.gs</a>
 % contact me at kontroller@srinivas.gs
-% Kontroller is at https://sourceforge.net/projects/daqkontroller/
+% Kontroller is at https://bitbucket.org/srinivasgs/kontroller
 % Kontroller is in the public domain. If you do use Kontroller for a
 % substantial project, do let me know at kontroller@srinivas.gs
 %
@@ -32,119 +32,16 @@
 % 
 % === dependencies===
 % 
-% Kontroller will check for dependencies on every run. If something is not met, it won't run
-% 1. MATLAB 2013a (older versions have a bug which prevent digital channels
-% from working well)
-% 2. The DAQ toolbox
-% 3. strkat.m, which is available with this file.
-% 4. oval.m
-% 5. PrettyFig.m
+% listed in the code, search for "dependencies"
 %
 % ===Known issues in this version===
 %
-% 1. only works with NI hardware
-% 2. [fixed] but digital inputs not supported.
-% 3. [fixed, but not verified] only works with an even number of channels
-% 4. oscilloscope plots do not show any label
-% 5. [fixed] no way to rescale oscilloscope plots
-% 6. no way to look at previous trials
-% 7. [fixed]
-% 8. manual control outputs do not "stick"--tend to osccilate
-% 9. [fixed]
-% 10. only voltage acquisition is supported. no support for other devices,
-% sound, or video, or instruments, or current measurements. 
-% 11. default figure locations and sizes may not be optimal on all screens.
-% 12. Manual control sliders don't work
-% 13. no abort condition failsafe
-% 14. cannot support multiple sampling rates for different channels
-% 15. only works when only one NI DAQ is connected
-% 16. only 1 NI DAQ device supported at a time. 
-% 17. Kontroller thinks a trial has been recorded when "run w/o saving" is
-% selected, even if a trial hasn't actually been recorded. 
-% 18. due to a problem with MATLAB's DAQ toolbox, Kontroller may
-% overestimate the number of analogue input channels available. 
-% 19. Kontroller incorrectly estimates the time remaining for a programme
-% 20. Kontroller's default sampling rate (w=1000) is hardwired in multiple
-% places, and shouldn't be. 
-% 21. ChannelNames or Paradigm Names with spaces don't work
-%
-% === changelog ===
-%
-% v0.3.0--added metadata option.
-% v0.3.1--cosmetic and UI changes
-% v0.3.2--bug fix: trial numbers now reset when file is changed.
-% v0.3.3--bug fixes
-% v0.3.4--Kontroller now logs OutputChannelNames and sampling rate.
-% v0.3.5--GUI for digital outputs
-% v0.3.6--reorganised variables; internal housekeeping 
-% v0.3.7--full support for digital outputs. needs MATLAB R2013a
-% v0.3.8--run trial intialisation and data agglomeration split into two
-% functions
-% v0.3.9--run trial now uses a background task--gone back to foreground
-% task in 0.4.1
-% v0.4.0--added a check to make sure that MATLAB dependencies are met
-% v0.4.1--fixed a bug where RunProgram() would not wait for background task
-% to finish. also, gone back to foreground task because background task had
-% issues with releasing session resources
-% v0.4.2--added the ability to pause a programme
-% v0.4.3--added a check to make sure that loaded control paradigms match the configured output channels
-% v0.4.4--added the ability to view a paradigm
-% v0.4.5--fixed a bug where only a digital channel prevented control
-% configuration, and where digital channels would not show in paradigm
-% displays
-% v0.4.6--fixed a bug where more than one digital output channel would not display correctly on control config screen 
-% v0.4.7--Kontroller can now loop over a selected subset of control
-% paradigms
-% v0.4.8--1) fixed a bug where multiple digital output controls would not
-% display correctly. 2) Kontroller now attempts to close all windows it
-% creates
-% v0.4.9--fixed a bug where saved paradigms would not load correctly if
-% digital output channels were being used.
-% v0.5.0--added a feature where input channels marked "Ground" will be used
-% as ground, and will not be recorded from. helps with eliminating ghosting/channel
-% cross-talk
-% v0.5.1--added a feature where destination file names can be directly edited
-% and removed, and trials can be run without logging data
-% v0.5.2--fixed a bug where output channel names were scrambled in file.
-% v0.5.3--date, time, Kontroller version, and NI board saved to metadata
-% automatically
-% v0.5.4--fixed a bug where Control Paradigms would not display propoerly
-% if there were an odd number of outputs. 
-% v0.5.5--logs a timestamp of every trial. 
-% v0.5.6--Kontroller now remembers programme selection, and re-selects the
-% chosen paradigms when paradigm finishes running
-% v0.5.7--Kontroller now remembers input channel ranges. 
-% v0.5.8 -- Kontroller now estimates time to completion of programme
-% v0.5.9 -- Kontroller can now delete paradigms
-% v0.6.0 -- Added code to caluclaute Epochs based on digital outputs,
-% useful for colour coding traces as they are acquired. (that still has to
-% be written)
-% v0.6.1 -- added code to recover from reserved hardware error
-% v0.6.2 -- added the ability to run Kontroller from the commandline.
-% Kontroller can be called from another function, and will run the
-% specified number of trials and return the data recorded. 
-% v0.6.3--adds support for running paradigms in sequence, one paradigm at a
-% time. 
-% v0.6.4 -- adds support for running programs consisting of arbitrary
-% sequences of paradigms
-%
-% ===roadmap===
-%
-% * estimated time to completion of programme
-% * support for continuous background control signals that are not part of
-% control paradigms--e.g., control signals to a stepper motor.
-% * support for aborting a programme
-% * support for aborting a run
-% * support for automatic termination of a trial based on input criteria
+% issue tracking at https://bitbucket.org/srinivasgs/kontroller/issues
 % 
 % ===Help, bug reports, contact and suggestions===
 % 
 % you should write to me at kontroller@srinivas.gs
 %
-% ===KONTROLLER_PREFERENCES===
-% preferences.email = 0;
-% this controls email preferneces. 0 = not chosen, will elciit prompt. 1 =
-% email OK, and is configured. 2 = no email.
 
 
 function [data] = Kontroller(gui,ControlParadigm,RunTheseParadigms,w)
