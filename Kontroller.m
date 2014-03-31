@@ -163,13 +163,17 @@ else
     % No DAQ toolbox
     error('Kontroller needs the <a href="http://www.mathworks.com/products/daq/">DAQ toolbox</a> to run, which was not detected.')
 end
-% check for strkat
-try
-    strkat('Checking for ','strkat.m..');
-catch
-    error('Kontroller needs <a href="https://sourceforge.net/projects/daqkontroller/">strkat.m</a> to run, which was not detected.')
 
+% check for internal dependencies
+dependencies = {'oval','strkat','PrettyFig'};
+for i = 1:length(dependencies)
+    if exist(dependencies{i}) ~= 2
+        error('Kontroller is missing an external function that it needs to run. You can download it <a href="https://bitbucket.org/srinivasgs/srinivas.gs_mtools">here.</a>')
+    end
 end
+clear i
+
+
 
 % check if data directory exists
 if exist('c:\data\','dir') == 7
