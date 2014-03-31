@@ -46,7 +46,11 @@
 
 function [data] = Kontroller(gui,ControlParadigm,RunTheseParadigms,w)
 VersionName= 'Kontroller v_67_';
-keyboard
+% check for new version of Kontroller
+try
+    CheckForNewestVersionOnBitBucket(mfilename,VersionName)
+end
+
 %% check for MATLAB dependencies
 v = ver;
 v = struct2cell(v);

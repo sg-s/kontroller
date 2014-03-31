@@ -212,6 +212,7 @@
 	},
 	"file_history":
 	[
+		"/code/Kontroller/Kontroller.m",
 		"/Users/sigbhu/Dropbox/code/core/srinivas.gs_mtools/ParseHTML.m",
 		"/Users/sigbhu/Dropbox/code/core/srinivas.gs_mtools/CheckForNewestVersionOnBitBucket(filename).m",
 		"/Users/sigbhu/Dropbox/code/auto/where-am-i.py",
@@ -338,8 +339,7 @@
 		"/labweb/pages/publications.html",
 		"/web/in-development/article-template/001-books.html",
 		"/web/essays/books/index.html",
-		"/web/in-development/article-template/css/docs.css",
-		"/web/in-development/css/template.css"
+		"/web/in-development/article-template/css/docs.css"
 	],
 	"find":
 	{
@@ -561,6 +561,10 @@
 		"height": 0.0,
 		"selected_items":
 		[
+			[
+				"ko",
+				"Kontroller.m"
+			],
 			[
 				"plottfaair",
 				"b/PlotTFAPIDAirspeeds2.m"
