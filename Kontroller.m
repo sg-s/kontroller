@@ -12,7 +12,7 @@
 % which channels you can use
 % 3. Click on "configure inputs". To configure analogue inputs, call
 % the channel you want to use something in the text field. Specify the input range as a number in
-% the smaller edit field
+% the smaller edit field.
 % (default is +/-10V)
 % 4. Click on "configure outputs".If you want to use an output channel, call
 % it something in the text field. Analogue on left, digital on right.
