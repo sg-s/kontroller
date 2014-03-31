@@ -45,7 +45,8 @@
 
 
 function [data] = Kontroller(gui,ControlParadigm,RunTheseParadigms,w)
-VersionName= 'Kontroller v0.6.6';
+VersionName= 'Kontroller v66';
+keyboard
 %% check for MATLAB dependencies
 v = ver;
 v = struct2cell(v);
