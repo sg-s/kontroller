@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(gui,ControlParadigm,RunTheseParadigms,w)
-VersionName= 'Kontroller v_69_';
+VersionName= 'Kontroller v_70_';
 
 
 %% check for MATLAB dependencies
@@ -1119,6 +1119,11 @@ end
         set(StartScopes,'Enable','off');
         set(MetadataButton,'Enable','off');
         set(ManualControlButton,'Enable','off');
+        set(FileNameSelect,'Enable','off');
+        set(SaveControlParadigmsButton,'Enable','off');
+        set(RemoveControlParadigmsButton,'Enable','off');
+        
+        
 
 
 
@@ -1239,6 +1244,11 @@ end
         set(StartScopes,'Enable','on');
         set(MetadataButton,'Enable','on');
         set(ManualControlButton,'Enable','on');
+        set(FileNameSelect,'Enable','on');
+        set(SaveControlParadigmsButton,'Enable','on');
+        set(RemoveControlParadigmsButton,'Enable','on');
+
+
 
     end
 
