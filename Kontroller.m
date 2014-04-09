@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(gui,ControlParadigm,RunTheseParadigms,w)
-VersionName= 'Kontroller v_67_';
+VersionName= 'Kontroller v_68_';
 
 
 %% check for MATLAB dependencies
