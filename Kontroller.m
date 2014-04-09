@@ -1,9 +1,12 @@
 % Kontroller.m
-% created by  <a href="http://srinivas.gs/">srinivas.gs</a>
-% contact me at kontroller@srinivas.gs
 % Kontroller is at https://bitbucket.org/srinivasgs/kontroller
-% Kontroller is in the public domain. If you do use Kontroller for a
-% substantial project, do let me know at kontroller@srinivas.gs
+% 
+% 
+% 
+% created by Srinivas Gorur-Shandilya at 10:20 , 09 April 2014. Contact me at http://srinivas.gs/contact/
+% 
+% This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. 
+% To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/.
 %
 % ===How to use Kontroller===
 %
@@ -46,10 +49,7 @@
 
 function [data] = Kontroller(gui,ControlParadigm,RunTheseParadigms,w)
 VersionName= 'Kontroller v_67_';
-% check for new version of Kontroller
-try
-    CheckForNewestVersionOnBitBucket(mfilename,VersionName)
-end
+
 
 %% check for MATLAB dependencies
 v = ver;
@@ -67,13 +67,18 @@ else
 end
 
 % check for internal dependencies
-dependencies = {'oval','strkat','PrettyFig'};
+dependencies = {'oval','strkat','PrettyFig','CheckForNewestVersionOnBitBucket'};
 for i = 1:length(dependencies)
     if exist(dependencies{i}) ~= 2
         error('Kontroller is missing an external function that it needs to run. You can download it <a href="https://bitbucket.org/srinivasgs/srinivas.gs_mtools">here.</a>')
     end
 end
 clear i
+
+% check for new version of Kontroller
+try
+    CheckForNewestVersionOnBitBucket(mfilename,VersionName)
+end
 
 
 
@@ -1104,6 +1109,12 @@ end
 
 %% run trial
     function [] = RunTrial(eo,ed) 
+
+        % disable config buttons
+        set(ConfigureInputChannelButton,'Enable','off');
+        set(ConfigureOutputChannelButton,'Enable','off');
+        set(ConfigureControlSignalsButton,'Enable','off');
+
         ComputeEpochs;
         if scopes_running
             % stop scopes
@@ -1211,6 +1222,11 @@ end
             
         end
         ProcessTrialData;
+
+        set(ConfigureInputChannelButton,'Enable','on');
+        set(ConfigureOutputChannelButton,'Enable','on');
+        set(ConfigureControlSignalsButton,'Enable','on');
+
     end
 
 %% process data == this function is called when the trial finishes running
