@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(gui,ControlParadigm,RunTheseParadigms,w)
-VersionName= 'Kontroller v_68_';
+VersionName= 'Kontroller v_69_';
 
 
 %% check for MATLAB dependencies
@@ -1110,10 +1110,18 @@ end
 %% run trial
     function [] = RunTrial(eo,ed) 
 
-        % disable config buttons
+        % disable all buttons
         set(ConfigureInputChannelButton,'Enable','off');
         set(ConfigureOutputChannelButton,'Enable','off');
         set(ConfigureControlSignalsButton,'Enable','off');
+        set(RunProgramButton,'Enable','off');
+        set(PauseProgramButton,'Enable','off');
+        set(StartScopes,'Enable','off');
+        set(MetadataButton,'Enable','off');
+        set(ManualControlButton,'Enable','off');
+
+
+
 
         ComputeEpochs;
         if scopes_running
@@ -1226,6 +1234,11 @@ end
         set(ConfigureInputChannelButton,'Enable','on');
         set(ConfigureOutputChannelButton,'Enable','on');
         set(ConfigureControlSignalsButton,'Enable','on');
+        set(RunProgramButton,'Enable','on');
+        set(PauseProgramButton,'Enable','on');
+        set(StartScopes,'Enable','on');
+        set(MetadataButton,'Enable','on');
+        set(ManualControlButton,'Enable','on');
 
     end
 
