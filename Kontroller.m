@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(gui,ControlParadigm,RunTheseParadigms,w)
-VersionName= 'Kontroller v_70_';
+VersionName= 'Kontroller v_71_';
 
 
 %% check for MATLAB dependencies
@@ -998,11 +998,17 @@ end
         if sequence_step < length(sequence) + 1
             % update time estimates
             t=toc;
-            tt=(t/(sequence_step))*length(sequence) - t; % time remaining
-            tt=oval(tt,2);
-            t=oval(toc,2);
-            ks = strkat('Running inter-trial function....','\n','Elapsed time is :', (t), 'seconds'...
+            if t < 2
+                % programme just started
+                ks = strkat('Running inter-trial function....');
+            else
+                tt=(t/(sequence_step-1))*length(sequence) - t; % time remaining
+                tt=oval(tt,2);
+                t=oval(toc,2);
+                ks = strkat('Running inter-trial function....','\n','Elapsed time is :', (t), 'seconds'...
                ,'\n',(tt),'seconds remain');
+            end
+            
             
             % run inter-trial function
             iti = (get(InterTrialIntervalControl,'String'));
