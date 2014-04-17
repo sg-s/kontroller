@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(gui,ControlParadigm,RunTheseParadigms,w)
-VersionName= 'Kontroller v_71_';
+VersionName= 'Kontroller v_72_';
 
 
 %% check for MATLAB dependencies
@@ -76,8 +76,10 @@ end
 clear i
 
 % check for new version of Kontroller
-try
-    CheckForNewestVersionOnBitBucket(mfilename,VersionName)
+if gui
+    try
+        CheckForNewestVersionOnBitBucket(mfilename,VersionName)
+    end
 end
 
 

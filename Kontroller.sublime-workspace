@@ -123,6 +123,14 @@
 	},
 	"buffers":
 	[
+		{
+			"file": "/code/Kontroller/Kontroller.m",
+			"settings":
+			{
+				"buffer_size": 63691,
+				"line_ending": "Windows"
+			}
+		}
 	],
 	"build_system": "",
 	"command_palette":
@@ -510,8 +518,39 @@
 	"groups":
 	[
 		{
+			"selected": 0,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "/code/Kontroller/Kontroller.m",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 63691,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								16226,
+								16226
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Matlab/Matlab.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 6945.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
 			]
 		}
 	],
@@ -561,6 +600,10 @@
 		"height": 0.0,
 		"selected_items":
 		[
+			[
+				"",
+				"Kontroller.m"
+			],
 			[
 				"ko",
 				"Kontroller.m"
@@ -698,10 +741,6 @@
 				"PlotTrialVariability.m"
 			],
 			[
-				"",
-				"TFAViewer2.m"
-			],
-			[
 				"error",
 				"/Users/sigbhu/Dropbox/code/b/PlotDoseResponses.m"
 			]
@@ -715,7 +754,7 @@
 		[
 			[
 				"",
-				"~/Dropbox/code/tracking/flytrack.sublime-project"
+				"~/code/DA/DA.sublime-project"
 			],
 			[
 				"Kon",
