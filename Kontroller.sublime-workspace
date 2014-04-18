@@ -127,7 +127,7 @@
 			"file": "/code/Kontroller/Kontroller.m",
 			"settings":
 			{
-				"buffer_size": 63691,
+				"buffer_size": 63714,
 				"line_ending": "Windows"
 			}
 		}
@@ -351,7 +351,7 @@
 	],
 	"find":
 	{
-		"height": 27.0
+		"height": 37.0
 	},
 	"find_in_files":
 	{
@@ -365,6 +365,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"updat",
 			"'k'",
 			"plot",
 			"TrialPlot",
@@ -491,8 +492,7 @@
 			"none",
 			"description",
 			"s",
-			"description",
-			"style"
+			"description"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -527,15 +527,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 63691,
+						"buffer_size": 63714,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								16226,
-								16226
+								1958,
+								1958
 							]
 						],
 						"settings":
@@ -545,7 +545,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 6945.0,
+						"translation.y": 544.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -754,7 +754,7 @@
 		[
 			[
 				"",
-				"~/code/DA/DA.sublime-project"
+				"~/code/tracking/flytrack.sublime-project"
 			],
 			[
 				"Kon",
