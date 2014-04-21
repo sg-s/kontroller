@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(gui,ControlParadigm,RunTheseParadigms,w)
-VersionName= 'Kontroller v_73_';
+VersionName= 'Kontroller v_74_';
 %% validate inputs
 if nargin == 0 
     % fine.
