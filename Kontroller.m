@@ -48,8 +48,18 @@
 
 
 function [data] = Kontroller(gui,ControlParadigm,RunTheseParadigms,w)
-VersionName= 'Kontroller v_72_';
-
+VersionName= 'Kontroller v_73_';
+%% validate inputs
+if nargin == 0 
+    % fine.
+    gui = 1; % default to showing the GUI
+elseif nargin < 3
+    error('Not enough input arguments. If you are trying to run Kontroller from the command line, you need three inputs')
+else
+   if isstruct(ControlParadigm) == 0 
+       error('ControlParadigm is not a structure.')
+   end
+end
 
 %% check for MATLAB dependencies
 v = ver;
@@ -92,17 +102,7 @@ else
     end
     mkdir('c:\data\')
 end
-%% validate inputs
-if nargin == 0 
-    % fine.
-    gui = 1; % default to showing the GUI
-elseif nargin < 3
-    error('Not enough input arguments. If you are trying to run Kontroller from the command line, you need three inputs')
-else
-   if isstruct(ControlParadigm) == 0 
-       error('ControlParadigm is not a structure.')
-   end
-end
+
 %% persistent internal variables
  
 % session handles
