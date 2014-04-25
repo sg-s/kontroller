@@ -47,19 +47,36 @@
 %
 
 
-function [data] = Kontroller(gui,ControlParadigm,RunTheseParadigms,w)
-VersionName= 'Kontroller v_75_';
+function [data] = Kontroller(varargin)
+VersionName= 'Kontroller v_76_';
 %% validate inputs
+gui = 0;
+RunTheseParadigms = [];
+ControlParadigm = []; % stores the actual control signals for the different control paradigm
+w = 1000; % 1kHz sampling  
 if nargin == 0 
     % fine.
     gui = 1; % default to showing the GUI
-elseif nargin < 3
-    error('Not enough input arguments. If you are trying to run Kontroller from the command line, you need three inputs')
-else
-   if isstruct(ControlParadigm) == 0 
-       error('ControlParadigm is not a structure.')
-   end
 end
+if iseven(nargin)
+    for i = 1:nargin
+        temp = varargin{i};
+        if ischar(temp)
+            eval(strcat(temp,'=varargin{i+1};'));
+        end
+    end
+    
+    
+else
+    error('Inputs need to be name value pairs')
+end
+
+if ~gui
+    if isempty(RunTheseParadigms) || isempty(ControlParadigm)
+        error('Kontroller does not know what control paradigms to run.')
+    end
+end
+
 
 %% check for MATLAB dependencies
 v = ver;
@@ -140,9 +157,6 @@ sequence = []; % this stores the sequence of trials to be done in this programme
 sequence_step = []; % stores where in the sequence the programme is
 programme_running = [];
 pause_programme = 0;
-if nargin < 2
-    ControlParadigm = []; % stores the actual control signals for the different control paradigm
-end
 % internal data variables
 thisdata = []; % stores data from current trial; needs to be combined with data
 data = [];
@@ -154,9 +168,7 @@ metadata = [];  % stores metadata associated with the whole file.
 timestamps = []; % first column stores the paradigm #, the second the trial #, and the third the timestamp
 Epochs = [];
 CustomSequence = [];
-if nargin < 3
-    w = 1000; % 1kHz sampling  
-end
+
 
 %% initlaise some metadata
 metadata.DateTime = datestr(now);
