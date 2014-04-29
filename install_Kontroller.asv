@@ -73,13 +73,11 @@ for i = 1:n
     
 end
 
-disp('Adding folders to path...')
+disp('Adding folders to p')
 % add folders to the matlab path
 addthese=dir(strcat(userDir,'\kontroller'));
 for i = 1:length(addthese)
-    if ~strcmp(addthese(i).name(1),'.') 
+    if ~strmatch(addthese(i).name(1),'.') 
         addpath(strcat(userDir,'\kontroller\',addthese(i).name))
     end
 end
-
-disp('All DONE! Type "Kontroller" to start.')
