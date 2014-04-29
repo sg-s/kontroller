@@ -57,8 +57,7 @@ w = 1000; % 1kHz sampling
 if nargin == 0 
     % fine.
     gui = 1; % default to showing the GUI
-end
-if iseven(nargin)
+elseif iseven(nargin)
     for i = 1:nargin
         temp = varargin{i};
         if ischar(temp)
@@ -70,6 +69,8 @@ if iseven(nargin)
 else
     error('Inputs need to be name value pairs')
 end
+
+
 
 if ~gui
     if isempty(RunTheseParadigms) || isempty(ControlParadigm)
