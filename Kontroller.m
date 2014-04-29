@@ -106,7 +106,7 @@ clear i
 % check for new version of Kontroller
 if gui
     try
-        CheckForNewestVersionOnBitBucket(mfilename,VersionName)
+        CheckForNewestVersionOnGitHub('kontroller',mfilename,VersionName);
     end
 end
 
