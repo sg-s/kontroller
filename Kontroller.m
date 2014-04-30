@@ -186,7 +186,6 @@ set(MetadataTextControl,'String','');
 
 %% make the GUI
 if gui
-    clc
     wh = waitbar(0.1,'Kontroller is starting...');
     f1 = figure('Position',[20 60 450 700],'Toolbar','none','Menubar','none','Name',VersionName,'NumberTitle','off','Resize','off','HandleVisibility','on','CloseRequestFcn',@QuitKontrollerCallback);
     waitbar(0.2,wh,'Generating UI...'); figure(wh)
