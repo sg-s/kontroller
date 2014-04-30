@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_78_';
+VersionName= 'Kontroller v_79_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -98,7 +98,7 @@ end
 dependencies = {'oval','strkat','PrettyFig','CheckForNewestVersionOnGitHub'};
 for i = 1:length(dependencies)
     if exist(dependencies{i}) ~= 2
-        error('Kontroller is missing an external function that it needs to run. You can download it <a href="https://bitbucket.org/srinivasgs/srinivas.gs_mtools">here.</a>')
+        error('Kontroller is missing an external function that it needs to run. You can download it <a href="https://github.com/sg-s/srinivas.gs_mtools">here.</a>')
     end
 end
 clear i
