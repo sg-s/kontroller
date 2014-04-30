@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_77_';
+VersionName= 'Kontroller v_78_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -95,7 +95,7 @@ else
 end
 
 % check for internal dependencies
-dependencies = {'oval','strkat','PrettyFig','CheckForNewestVersionOnBitBucket'};
+dependencies = {'oval','strkat','PrettyFig','CheckForNewestVersionOnGitHub'};
 for i = 1:length(dependencies)
     if exist(dependencies{i}) ~= 2
         error('Kontroller is missing an external function that it needs to run. You can download it <a href="https://bitbucket.org/srinivasgs/srinivas.gs_mtools">here.</a>')
@@ -284,6 +284,19 @@ if ~isempty(dir('Kontroller.Config.Input.mat'))
     end
     
 end
+
+% load sampling rate
+if ~isempty(dir('Kontroller.Config.SamplingRate.mat'))
+    
+    load('Kontroller.Config.SamplingRate.mat','w')
+    if gui
+        disp('Loading saved sampling rate...')
+
+         set(SamplingRateControl,'String',mat2str(w))
+    end
+    
+end
+
 if gui
     waitbar(0.7,wh,'Checking for output config...'); figure(wh)
 end
@@ -746,8 +759,7 @@ end
                 scopes_running = 0;
             else
                 % start scopes
-                figure(scope_fig)
-                w = 1000; % 1kHz sampling     
+                figure(scope_fig)   
                 % create session
                 s = daq.createSession('ni');
                 s.IsContinuous = true;

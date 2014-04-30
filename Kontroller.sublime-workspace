@@ -212,9 +212,9 @@
 	},
 	"file_history":
 	[
+		"/code/Kontroller/Kontroller.m",
 		"/Users/sigbhu/code/kontroller/Kontroller.m",
 		"/Users/sigbhu/code/kontroller/Kontroller.sublime-project",
-		"/code/Kontroller/Kontroller.m",
 		"/Users/sigbhu/code/Kontroller/.gitignore",
 		"/Users/sigbhu/.gitignore",
 		"/Users/sigbhu/code/Kontroller/.git-ignore",
@@ -263,16 +263,12 @@
 		"/Users/sigbhu/Dropbox/code/DA/Analysis_January.m",
 		"/Users/sigbhu/Dropbox/code/DA/Analysis_January",
 		"/Users/sigbhu/Dropbox/code/b/PlotAirspeedCheck.m",
-		"/Users/sigbhu/Dropbox/code/tracking/FlyTrack.m",
+		"/Users/sigbhu/Dropbox/code/fly-voyeur/FlyTrack.m",
 		"/RSSBlackList.txt",
 		"/Users/sigbhu/Dropbox/code/b/FileName2GenoDate.m",
 		"/Library/WebServer/Documents/wiki/LocalSettings.php",
 		"/Users/sigbhu/Dropbox/code/b/PlotTFAResponses3.m",
 		"/Users/sigbhu/Dropbox/code/core/TrialPlot.m",
-		"/private/var/folders/gq/0hzwy57n79d1813pnfy51mmr0000gn/T/98bf81be-fb5d-403c-ae0a-9b72c407caf0/emonet.biology.yale.edu/pages/people.html",
-		"/private/var/folders/gq/0hzwy57n79d1813pnfy51mmr0000gn/T/98bf81be-fb5d-403c-ae0a-9b72c407caf0/emonet.biology.yale.edu/nfsim/download/index.php",
-		"/private/var/folders/gq/0hzwy57n79d1813pnfy51mmr0000gn/T/98bf81be-fb5d-403c-ae0a-9b72c407caf0/emonet.biology.yale.edu/nfsim/download/processRegistration.php",
-		"/Users/sigbhu/.ssh/known_hosts",
 		"/private/var/folders/gq/0hzwy57n79d1813pnfy51mmr0000gn/T/98bf81be-fb5d-403c-ae0a-9b72c407caf0/emonet.biology.yale.edu/pages/publications.html",
 		"/Users/sigbhu/Dropbox/code/zoidberg/make_fig_15_metrics.m",
 		"/Users/sigbhu/Dropbox/code/b/PlotTFAResponses2.m",
@@ -562,6 +558,10 @@
 		"selected_items":
 		[
 			[
+				"k",
+				"Kontroller.m"
+			],
+			[
 				"",
 				"Kontroller.m"
 			],
@@ -715,7 +715,7 @@
 		[
 			[
 				"",
-				"~/code/Kontroller/Kontroller.sublime-project"
+				"~/code/fly-voyeur/flytrack.sublime-project"
 			],
 			[
 				"Kon",
