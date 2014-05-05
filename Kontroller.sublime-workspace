@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"Sampl",
+				"SamplingRateControl"
+			],
+			[
 				"Thr",
 				"ThrustSurges"
 			],
@@ -213,6 +217,9 @@
 	"file_history":
 	[
 		"/code/Kontroller/Kontroller.m",
+		"/code/Kontroller/Kontroller.asv",
+		"/code/Kontroller/install_Kontroller.m",
+		"/code/Kontroller/install_Kontroller.asv",
 		"/Users/sigbhu/code/kontroller/Kontroller.m",
 		"/Users/sigbhu/code/kontroller/Kontroller.sublime-project",
 		"/Users/sigbhu/code/Kontroller/.gitignore",
@@ -350,9 +357,10 @@
 	},
 	"find_state":
 	{
-		"case_sensitive": false,
+		"case_sensitive": true,
 		"find_history":
 		[
+			"w",
 			"updat",
 			"'k'",
 			"plot",
@@ -479,8 +487,7 @@
 			"description",
 			"none",
 			"description",
-			"s",
-			"description"
+			"s"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -500,7 +507,7 @@
 		"reverse": false,
 		"show_context": true,
 		"use_buffer2": true,
-		"whole_word": false,
+		"whole_word": true,
 		"wrap": true
 	},
 	"groups":
@@ -558,11 +565,11 @@
 		"selected_items":
 		[
 			[
-				"k",
+				"",
 				"Kontroller.m"
 			],
 			[
-				"",
+				"k",
 				"Kontroller.m"
 			],
 			[
