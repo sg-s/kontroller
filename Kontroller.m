@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_80_';
+VersionName= 'Kontroller v_81_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -803,7 +803,7 @@ end
     function [] = PlotCallback(src,event)
         sz = size(scope_plot_data);
         % capture all the data acquired...        
-        a =  length(scope_plot_data)-trial_running*w/10 + 1;
+        a =  find(isnan(scope_plot_data(1,:)),1,'first');
         z =  a + length(event.Data);
         for si = 1:sz(1)
             scope_plot_data(si,a:z-1) = event.Data(:,si)';
