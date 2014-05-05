@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_79_';
+VersionName= 'Kontroller v_80_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -162,6 +162,7 @@ pause_programme = 0;
 thisdata = []; % stores data from current trial; needs to be combined with data
 data = [];
 scope_plot_data = [];
+time =[];
 VarNames = [];
 SaveToFile= [];
 Trials = []; % this keeps track of how many trials have been done with each paradigm
@@ -801,14 +802,21 @@ end
 %% plot live data to scopes and grab data
     function [] = PlotCallback(src,event)
         sz = size(scope_plot_data);
-        % capture all the data acquired...
+        % capture all the data acquired...        
+        a =  length(scope_plot_data)-trial_running*w/10 + 1;
+        z =  a + length(event.Data);
         for si = 1:sz(1)
-            scope_plot_data(si,:)=[scope_plot_data(si,length(event.Data)+1:end) event.Data(:,si)'];
+            scope_plot_data(si,a:z-1) = event.Data(:,si)';
         end
+        
         % ...but plot only the ones requested
         if gui
             for si = ScopeThese
-                plot(ScopeHandles(si),scope_plot_data(si,:));
+                nEpochs = unique(Epochs);
+                
+                    plot(ScopeHandles(si),time,scope_plot_data(si,:));
+                
+                
 
             end
             trial_running = trial_running - 1;
@@ -1161,6 +1169,9 @@ end
 
 
         ComputeEpochs;
+        
+        
+        
         if scopes_running
             % stop scopes
             s.stop;
@@ -1173,6 +1184,9 @@ end
         set(RunTrialButton,'Enable','off','String','running...')
         % figure out which pradigm to run
         ThisParadigm= (get(ParadigmListDisplay,'Value'));
+        
+        time=(1/w):(1/w):(length(ControlParadigm(ThisParadigm).Outputs)/w);
+        
         % figure out trial no
         if ~length(data)
             % no data at all
@@ -1539,6 +1553,7 @@ end
             Epochs(Epochs == ue(si)) = 1e4+si;
         end
         Epochs = Epochs-1e4;
+        
     end
 
 end
