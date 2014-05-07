@@ -15,13 +15,11 @@ EpochBreaks = [1; find(abs(diff(Epochs))); length(Epochs)];
 % define colors
 c = {'k','g','r','b','m','k','g','r','b','m'};
 
-% make sure hold is on
-
-
+% plot it
 for i = 1:length(plothere)
-	hold(plothere(i))
+	cla(plothere(i))
 	for j = 1:length(EpochBreaks)-1
-		thisEpoch = Epochs(EpochBreaks(j));
+		thisEpoch = Epochs(EpochBreaks(j)+1);
 		plot(plothere(i),time(EpochBreaks(j):EpochBreaks(j+1)),data(plotthese(i),EpochBreaks(j):EpochBreaks(j+1)),c{thisEpoch})
 
 	end

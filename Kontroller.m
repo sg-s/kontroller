@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_81_';
+VersionName= 'Kontroller v_82_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -578,7 +578,7 @@ function [] =ManualControlCallback(eo,ed)
             ScopeHandles(i) = subplot(2,rows,i);
             plotname=strcat(InputChannels{UsedInputChannels(i)},'-',InputChannelNames{UsedInputChannels(i)});
             ylabel(plotname)
-            set(ScopeHandles(i),'XLim',[0 5000]), hold off
+            set(ScopeHandles(i),'XLim',[0 5000]), hold on
             s.addAnalogInputChannel('Dev1',InputChannels{UsedInputChannels(ScopeThese(i))}, 'Voltage'); % add channel
         end
         lh = s.addlistener('DataAvailable',@PlotCallback);
@@ -811,10 +811,11 @@ end
         
         % ...but plot only the ones requested
         if gui
+            EpochPlot(ScopeHandles(ScopeThese),ScopeThese,time,scope_plot_data,Epochs);
             for si = ScopeThese
                 nEpochs = unique(Epochs);
                 
-                    plot(ScopeHandles(si),time,scope_plot_data(si,:));
+                   % plot(ScopeHandles(si),time,scope_plot_data(si,:));
                 
                 
 
@@ -1234,7 +1235,7 @@ end
         ti = 1;
         for i = ScopeThese
             ScopeHandles(i) = subplot(2,rows,ti); ti = ti+1;
-            set(ScopeHandles(i),'XLim',[0 T*w]), hold off
+            set(ScopeHandles(i),'XLim',[0 T]), hold on
         end
          
         % add the analogue input channels
@@ -1547,12 +1548,14 @@ end
             TheseDigitalOutputs(si,:) = TheseDigitalOutputs(si,:).*(2^si-1);
         end
         Epochs = sum(TheseDigitalOutputs);
+        
         % compress epochs
         ue = unique(Epochs);
         for si = 1:length(unique(Epochs))
             Epochs(Epochs == ue(si)) = 1e4+si;
         end
         Epochs = Epochs-1e4;
+        
         
     end
 
