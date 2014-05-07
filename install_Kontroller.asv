@@ -79,18 +79,9 @@ disp('Adding folders to path...')
 % add folders to the matlab path
 addthese=dir(strcat(userDir,'\kontroller'));
 
-% rename folders to soemthing more reaosnable
-% for i = 1:length(addthese)
-%     for j = 1:length(shortnames)
-%         if strfind(addthese(i).name,shortnames{j})
-%             keyboard
-%             movefile(addthese(i).name,shortnames{j})
-%         end
-%     end
-%     clear j
-%     
-% end
-% clear i
+for i = 1:length(addthese)
+end
+clear i
 
 for i = 1:length(addthese)
     if ~strcmp(addthese(i).name(1),'.') 
