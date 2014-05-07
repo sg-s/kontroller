@@ -80,18 +80,26 @@ disp('Adding folders to path...')
 addthese=dir(strcat(userDir,'\kontroller'));
 
 % rename folders to soemthing more reaosnable
-% for i = 1:length(addthese)
-%     for j = 1:length(shortnames)
-%         if strfind(addthese(i).name,shortnames{j})
-%             keyboard
-%             movefile(addthese(i).name,shortnames{j})
-%         end
-%     end
-%     clear j
-%     
-% end
-% clear i
 
+try
+    for i = 1:length(addthese)
+        for j = 1:length(shortnames)
+            if strfind(addthese(i).name,shortnames{j})
+                movefrom = strcat(userDir,'\kontroller\',addthese(i).name);
+                moveto = strcat(userDir,'\kontroller\',shortnames{j});
+                movefile(movefrom,moveto);
+            end
+        end
+        clear j
+
+    end
+    clear i
+catch
+    error('It looks like Kontroller is already installed. Delete the previous install before running this script.')
+end
+
+
+addthese=dir(strcat(userDir,'\kontroller'));
 for i = 1:length(addthese)
     if ~strcmp(addthese(i).name(1),'.') 
         
