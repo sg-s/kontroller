@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_84_';
+VersionName= 'Kontroller v_85_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -1078,6 +1078,10 @@ end
             
             sequence = [];
             sequence_step = [];
+            
+            beep
+            pause(0.1)
+            beep
             
             
         end
