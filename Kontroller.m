@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_83_';
+VersionName= 'Kontroller v_84_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -178,6 +178,7 @@ d = daq.getDevices;
 metadata.daqName = d.Model;
 metadata.KontrollerVersion = VersionName;
 metadata.ComputerName = getenv('COMPUTERNAME');
+metadata.SessionName = RandomString(10);
 fn = fieldnames(metadata);
 for i = 1:length(fn)
     metadatatext{i} = strcat(fn{i},' : ',mat2str(getfield(metadata,fn{i}))); %#ok<AGROW>
