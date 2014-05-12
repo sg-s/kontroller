@@ -42,13 +42,13 @@
 % issue tracking at https://bitbucket.org/srinivasgs/kontroller/issues
 % 
 % ===Help, bug reports, contact and suggestions===
-% 
+% ./  
 % you should write to me at kontroller@srinivas.gs
 %
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_83_';
+VersionName= 'Kontroller v_86_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -178,6 +178,7 @@ d = daq.getDevices;
 metadata.daqName = d.Model;
 metadata.KontrollerVersion = VersionName;
 metadata.ComputerName = getenv('COMPUTERNAME');
+metadata.SessionName = RandomString(10);
 fn = fieldnames(metadata);
 for i = 1:length(fn)
     metadatatext{i} = strcat(fn{i},' : ',mat2str(getfield(metadata,fn{i}))); %#ok<AGROW>
@@ -234,7 +235,9 @@ if gui
 
     waitbar(0.3,wh,'Generating global variables...'); figure(wh)
     StartScopes = uicontrol(f1,'Position',[260 465 150 50],'Style','pushbutton','Enable','off','String','Start Scopes','FontSize',12,'Callback',@ScopeCallback);
-    scope_fig = figure('Position',[500 150 750 650],'Toolbar','none','Name','Oscilloscope','NumberTitle','off','Resize','on','Visible','off','CloseRequestFcn',@QuitKontrollerCallback); hold on; 
+    scsz = get(0,'ScreenSize');
+    keyboard
+    scope_fig = figure('Position',[500 150 scsz(3)-400 szsz(4)-200],'Toolbar','none','Name','Oscilloscope','NumberTitle','off','Resize','on','Visible','off','CloseRequestFcn',@QuitKontrollerCallback); hold on; 
 
 end
 
@@ -1077,6 +1080,10 @@ end
             
             sequence = [];
             sequence_step = [];
+            
+            beep
+            pause(0.1)
+            beep
             
             
         end

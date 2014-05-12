@@ -42,13 +42,13 @@
 % issue tracking at https://bitbucket.org/srinivasgs/kontroller/issues
 % 
 % ===Help, bug reports, contact and suggestions===
-% 
+% ./  
 % you should write to me at kontroller@srinivas.gs
 %
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_85_';
+VersionName= 'Kontroller v_86_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -105,7 +105,9 @@ clear i
 
 % check for new version of Kontroller
 if gui
+    wh = waitbar(0.1,'Kontroller is starting...');
     try
+        waitbar(0.2,wh,'Checking for updates...'); figure(wh)
         CheckForNewestVersionOnGitHub('kontroller',mfilename,VersionName);
     end
 end
@@ -188,9 +190,9 @@ set(MetadataTextControl,'String','');
 
 %% make the GUI
 if gui
-    wh = waitbar(0.1,'Kontroller is starting...');
+
     f1 = figure('Position',[20 60 450 700],'Toolbar','none','Menubar','none','Name',VersionName,'NumberTitle','off','Resize','off','HandleVisibility','on','CloseRequestFcn',@QuitKontrollerCallback);
-    waitbar(0.2,wh,'Generating UI...'); figure(wh)
+    waitbar(0.3,wh,'Generating UI...'); figure(wh)
     Konsole = uicontrol('Position',[15 600 425 90],'Style','text','String','Kontroller is starting...','FontName','Courier','HorizontalAlignment','left');
     ConfigureInputChannelButton = uicontrol('Position',[15 540 140 50],'Style','pushbutton','Enable','off','String','Configure Inputs','FontSize',10,'Callback',@ConfigureInputChannels);
     ConfigureOutputChannelButton = uicontrol('Position',[160 540 140 50],'Style','pushbutton','Enable','off','String','Configure Outputs','FontSize',10,'Callback',@ConfigureOutputChannels);
@@ -233,9 +235,10 @@ if gui
     ManualControlButton = uicontrol(f1,'Position',[10 230 170 30],'Enable','on','Style','pushbutton','String','Manual Control','Callback',@ManualControlCallback);
     MetadataButton = uicontrol(f1,'Position',[10 270 170 30],'Enable','on','Style','pushbutton','String','Add Metadata...','Callback',@MetadataCallback);
 
-    waitbar(0.3,wh,'Generating global variables...'); figure(wh)
+    waitbar(0.4,wh,'Generating global variables...'); figure(wh)
     StartScopes = uicontrol(f1,'Position',[260 465 150 50],'Style','pushbutton','Enable','off','String','Start Scopes','FontSize',12,'Callback',@ScopeCallback);
-    scope_fig = figure('Position',[500 150 750 650],'Toolbar','none','Name','Oscilloscope','NumberTitle','off','Resize','on','Visible','off','CloseRequestFcn',@QuitKontrollerCallback); hold on; 
+    scsz = get(0,'ScreenSize');
+    scope_fig = figure('Position',[500 100 scsz(3)-500 scsz(4)-200],'Toolbar','none','Name','Oscilloscope','NumberTitle','off','Resize','on','Visible','off','CloseRequestFcn',@QuitKontrollerCallback); hold on; 
 
 end
 
