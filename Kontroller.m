@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_86_';
+VersionName= 'Kontroller v_87_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -587,6 +587,7 @@ function [] =ManualControlCallback(eo,ed)
         end
         lh = s.addlistener('DataAvailable',@PlotCallback);
         
+        
         % configure session outputs
         MCOutputData = zeros(length(UsedOutputChannels),500)'; 
         TheseChannels=OutputChannels(UsedOutputChannels);
@@ -776,9 +777,10 @@ end
                 for i = 1:length(get(PlotInputs,'Value'))
                     ScopeHandles(i) = subplot(2,rows,i);
                     set(ScopeHandles(i),'XLim',[0 5000]), hold off
-                    title( strcat(InputChannels{UsedInputChannels(i)},' -- ',InputChannelNames{UsedInputChannels(i)}))
+                    ylabel( strcat(InputChannels{UsedInputChannels(i)},' -- ',InputChannelNames{UsedInputChannels(i)}))
                     s.addAnalogInputChannel('Dev1',InputChannels{UsedInputChannels(ScopeThese(i))}, 'Voltage'); % add channel
                 end
+                
                 
                 s.Rate = w; 
                 lh = s.addlistener('DataAvailable',@PlotCallback);
@@ -1244,6 +1246,9 @@ end
         for i = ScopeThese
             ScopeHandles(i) = subplot(2,rows,ti); ti = ti+1;
             set(ScopeHandles(i),'XLim',[0 T]), hold on
+            plotname=strcat(InputChannels{UsedInputChannels(i)},'-',InputChannelNames{UsedInputChannels(i)});
+            plotname = strrep(plotname,'_','-');
+            title(plotname)
         end
          
         % add the analogue input channels
