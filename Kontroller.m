@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_87_';
+VersionName= 'Kontroller v_88_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -64,6 +64,7 @@ elseif iseven(nargin)
             eval(strcat(temp,'=varargin{i+1};'));
         end
     end
+    clear i
     
     
 else
@@ -82,7 +83,7 @@ end
 %% check for MATLAB dependencies
 v = ver;
 v = struct2cell(v);
-[~,j]=ind2sub(size(v), strmatch('Data Acquisition Toolbox', v, 'exact'));
+j = find(strcmp('Data Acquisiton Toolbox', v));
 if ~isempty(j)
     % check version of release
     if str2double(v{2,:,j}) < 3.3
@@ -93,6 +94,7 @@ else
     % No DAQ toolbox
     error('Kontroller needs the <a href="http://www.mathworks.com/products/daq/">DAQ toolbox</a> to run, which was not detected.')
 end
+clear j
 
 % check for internal dependencies
 dependencies = {'oval','strkat','PrettyFig','CheckForNewestVersionOnGitHub'};
@@ -109,6 +111,8 @@ if gui
     try
         waitbar(0.2,wh,'Checking for updates...'); figure(wh)
         CheckForNewestVersionOnGitHub('kontroller',mfilename,VersionName);
+    catch
+        disp('Could not check for updates.')
     end
 end
 
@@ -185,6 +189,7 @@ fn = fieldnames(metadata);
 for i = 1:length(fn)
     metadatatext{i} = strcat(fn{i},' : ',mat2str(getfield(metadata,fn{i}))); %#ok<AGROW>
 end
+clear i
 set(MetadataTextDisplay,'String',metadatatext);
 set(MetadataTextControl,'String','');
 
@@ -424,6 +429,7 @@ end
                 end
                 uicontrol(f2,'Position',[160 10+Height-i*nspacing 50 20],'Style', 'text','String',InputChannels{i},'FontSize',12);
             end
+            clear i
             for i = 1:n/2  % right side
                 if ismember(n/2+i,UsedInputChannels)
                     ri(i) = uicontrol(f2,'Position',[300 10+Height-i*nspacing 100 20],'Style', 'edit','String',InputChannelNames{n/2+i},'FontSize',12,'Callback',@InputConfigCallback);
@@ -440,6 +446,7 @@ end
                 end
                 uicontrol(f2,'Position',[220 10+Height-i*nspacing 50 20],'Style', 'text','String',InputChannels{n/2+i},'FontSize',12);
             end
+            clear i
             
         else
             error('Odd number of channels, cannot handle this')
@@ -467,6 +474,7 @@ end
                 end
                 uicontrol(f3,'Position',[160 Height-i*nspacing 50 20],'Style', 'text','String',OutputChannels{i},'FontSize',12);
             end
+            clear i
             for i = 1:n/2  % right side
                 if ismember(n/2+i,UsedOutputChannels)
                     
@@ -476,6 +484,7 @@ end
                 end
                 uicontrol(f3,'Position',[220 Height-i*nspacing 50 20],'Style', 'text','String',OutputChannels{n/2+i},'FontSize',12);
             end
+            clear i
             
         else
             error('Odd number of channels, cannot handle this')
@@ -499,6 +508,7 @@ end
                 end
                 uicontrol(f4,'Position',[160 Height-i*nspacing 100 20],'Style', 'text','String',DigitalOutputChannels{i},'FontSize',10);
             end
+            clear i
             for i = 1:n/2  % right side
                 if ismember(n/2+i,UsedOutputChannels)
                     
@@ -508,6 +518,7 @@ end
                 end
                 uicontrol(f4,'Position',[280 Height-i*nspacing 100 20],'Style', 'text','String',DigitalOutputChannels{n/2+i},'FontSize',10);
             end
+            clear i
             
         else
             error('Odd number of channels, cannot handle this')
@@ -550,6 +561,7 @@ function [] =ManualControlCallback(eo,ed)
                     oi = oi +1; 
                 end
             end
+            clear i
             for i = 1:n/2  % right side  
                 if ismember(i+n/2,UsedOutputChannels)
                     MCoi(oi) = uicontrol(fMC,'Position',[390 Height-i*nspacing 100 20],'Style', 'slider','Min',0,'Max',5,'Value',0,'String',OutputChannelNames{n/2+i},'FontSize',16,'Callback',@ManualControlSliderCallback);
@@ -558,6 +570,7 @@ function [] =ManualControlCallback(eo,ed)
                     oi = oi +1;
                 end
             end
+            clear i
             
         else
             % odd number of channels
@@ -577,7 +590,6 @@ function [] =ManualControlCallback(eo,ed)
         ScopeHandles = []; % axis handles for each sub plot in scope
         rows = ceil(length(get(PlotInputs,'Value'))/2);
         ScopeThese = get(PlotInputs,'Value');
-        PlotNames = get(PlotInputs,'String'); 
         for i = 1:length(get(PlotInputs,'Value'))
             ScopeHandles(i) = subplot(2,rows,i);
             plotname=strcat(InputChannels{UsedInputChannels(i)},'-',InputChannelNames{UsedInputChannels(i)});
@@ -585,6 +597,7 @@ function [] =ManualControlCallback(eo,ed)
             set(ScopeHandles(i),'XLim',[0 5000]), hold on
             s.addAnalogInputChannel('Dev1',InputChannels{UsedInputChannels(ScopeThese(i))}, 'Voltage'); % add channel
         end
+        clear i
         lh = s.addlistener('DataAvailable',@PlotCallback);
         
         
@@ -594,6 +607,7 @@ function [] =ManualControlCallback(eo,ed)
         for i = 1:length(TheseChannels)
              s.addAnalogOutputChannel('Dev1',OutputChannels{UsedOutputChannels(i)}, 'Voltage');
         end
+        clear i
         s.queueOutputData(MCOutputData);
         %s.NotifyWhenScansQueuedBelow = 100; % this line causes random
         %stops; don't know why
@@ -617,11 +631,13 @@ end
             thisvalue = get(MCoi(i),'Value');
             MCOutputData(:,i) = thisvalue*ones(500,1);
         end
+        clear i
         % now check text entry fields. this overrides the slider
         for i = 1:length(UsedOutputChannels)
             thisvalue = str2double(get(MCNumoi(i),'String'));
             MCOutputData(:,i) = thisvalue*ones(500,1);
         end
+        clear i
         
         delete(lhMC)
         lhMC = s.addlistener('DataRequired',@(src,event) src.queueOutputData(MCOutputData));
@@ -652,6 +668,7 @@ end
               end
               
          end
+         clear i
          % then scan right
          for i = 1:n/2
               if isempty(strmatch(get(ri(i),'String'),InputChannels))
@@ -667,6 +684,7 @@ end
                   end
               end
          end
+         clear i
          
          % update the input channel list
          PlotInputsList = InputChannelNames(UsedInputChannels);
@@ -695,6 +713,7 @@ function [] = OutputConfigCallback(eo,ed)
                   OutputChannelNames{i} = get(lo(i),'String');
               end
          end
+         clear i
          % then scan right
          for i = 1:n/2
               if isempty(strmatch(get(ro(i),'String'),OutputChannels))
@@ -703,6 +722,7 @@ function [] = OutputConfigCallback(eo,ed)
                   OutputChannelNames{n/2+i} = get(ro(i),'String');
               end
          end
+         clear i
          
          % update the output channel control signal config
          if ~isempty(UsedOutputChannels)
@@ -723,6 +743,7 @@ function [] = OutputConfigCallback(eo,ed)
                   DigitalOutputChannelNames{i} = get(dlo(i),'String');
               end
          end
+         clear i
          % then scan right
          for i = 1:n/2
               if isempty(strmatch(get(dro(i),'String'),DigitalOutputChannels))
@@ -731,6 +752,7 @@ function [] = OutputConfigCallback(eo,ed)
                   DigitalOutputChannelNames{n/2+i} = get(dro(i),'String');
               end
          end
+         clear i
          
          % update the output channel control signal config
          if ~isempty(UsedOutputChannels) || ~isempty(UsedDigitalOutputChannels)
@@ -780,6 +802,7 @@ end
                     ylabel( strcat(InputChannels{UsedInputChannels(i)},' -- ',InputChannelNames{UsedInputChannels(i)}))
                     s.addAnalogInputChannel('Dev1',InputChannels{UsedInputChannels(ScopeThese(i))}, 'Voltage'); % add channel
                 end
+                clear i
                 
                 
                 s.Rate = w; 
@@ -791,6 +814,7 @@ end
                     [a,~]=ind2sub(size(InputChannels), strmatch(s.Channels(i).ID, InputChannels, 'exact'));
                     s.Channels(i).Range = InputChannelRanges(a)*[-1 1];
                 end
+                clear i
                 
                 % fix scope labels
                 ScopeThese = 1:length(get(PlotInputs,'Value'));
@@ -848,7 +872,7 @@ end
                 badvar = [badvar i];
             end
         end
-        
+        clear i
         var(badvar) = []; clear badvar
         
         % make the gui
@@ -872,6 +896,7 @@ end
                 uicontrol(fcs,'Position',[320 30+i*100 100 30],'Style','text','String',OutputChannelNames{UsedOutputChannels(i)},'FontSize',12);
 
             end
+            clear i
             ti=1;
             for i = length(UsedOutputChannels)+1:no
                 ControlHandles(i) = uicontrol(fcs,'Position',[150 10+i*100 150 50],'Style','popupmenu','Enable','on','String',VarNames,'FontSize',12);
@@ -913,6 +938,8 @@ end
             ControlParadigm(thisp).Outputs(i,:)=evalin('base',cell2mat(VarNames(get(ControlHandles(i),'Value'))));
             ti=ti+1;
         end
+        clear i
+
         % update the paradigm list
         ControlParadigmList = [ControlParadigmList get(ParadigmNameUI,'String')];
         set(ParadigmListDisplay,'String',ControlParadigmList)
@@ -1174,11 +1201,6 @@ end
         set(SaveControlParadigmsButton,'Enable','off');
         set(RemoveControlParadigmsButton,'Enable','off');
         
-        
-
-
-
-
         ComputeEpochs;
         
         
@@ -1250,22 +1272,29 @@ end
             plotname = strrep(plotname,'_','-');
             title(plotname)
         end
+        clear i
          
         % add the analogue input channels
         TheseChannels=InputChannels(UsedInputChannels);
         for i = 1:length(TheseChannels)
             s.addAnalogInputChannel('Dev1',InputChannels{UsedInputChannels(i)}, 'Voltage');
         end
+        clear i
+
         % add the analogue output channels
         TheseChannels=OutputChannels(UsedOutputChannels);
         for i = 1:length(TheseChannels)
              s.addAnalogOutputChannel('Dev1',OutputChannels{UsedOutputChannels(i)}, 'Voltage');
         end
+        clear i
+
         % add the digital output channels
         TheseChannels=DigitalOutputChannels(UsedDigitalOutputChannels);
         for i = 1:length(TheseChannels)
              s.addDigitalChannel('Dev1',DigitalOutputChannels{UsedDigitalOutputChannels(i)}, 'OutputOnly');
         end
+        clear i
+
         % configure listener to plot data on the scopes 
         lh = s.addlistener('DataAvailable',@PlotCallback);
         
@@ -1338,6 +1367,8 @@ end
                     eval( strcat('data(ThisParadigm).',InputChannelNames{UsedInputChannels(i)},'=thisdata(',mat2str(i),',:);'));
                 end
             end
+            clear i
+
         else
             % some data already exists, need to append
             % find the correct pradigm
