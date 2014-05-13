@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_88_';
+VersionName= 'Kontroller v_89_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -83,13 +83,8 @@ end
 %% check for MATLAB dependencies
 v = ver;
 v = struct2cell(v);
-j = find(strcmp('Data Acquisiton Toolbox', v));
+j = find(strcmp('Data Acquisition Toolbox', v), 1);
 if ~isempty(j)
-    % check version of release
-    if str2double(v{2,:,j}) < 3.3
-        % version not supported
-        error('Kontroller needs version 3.3 or better of the <a href="http://www.mathworks.com/products/daq/">DAQ toolbox</a> to run, which was not detected.')
-    end
 else
     % No DAQ toolbox
     error('Kontroller needs the <a href="http://www.mathworks.com/products/daq/">DAQ toolbox</a> to run, which was not detected.')
