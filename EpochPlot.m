@@ -7,6 +7,8 @@
 % To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/.EpochPlot
 % plots traces where differnet traces are coloured by epoch
 function [] = EpochPlot(plothere,plotthese,time,data,Epochs)
+
+
 % compute epoch starts and stops
 Epochs = Epochs(:);
 nEpochs = length(unique(Epochs));

@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_89_';
+VersionName= 'Kontroller v_90_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -787,7 +787,8 @@ end
                 s.IsContinuous = true;
                 s.NotifyWhenDataAvailableExceeds = w/10; % 10Hz
                 % update scope_plot_data
-                scope_plot_data = NaN(length(get(PlotInputs,'Value')),5000); % 5 s of  data in each channel
+                scope_plot_data = NaN(length(get(PlotInputs,'Value')),5*w); % 5 s of  data in each channel
+                time = (1/w):(1/w):5;
                 ScopeHandles = []; % axis handles for each sub plot in scope
                 rows = ceil(length(get(PlotInputs,'Value'))/2);
                 ScopeThese = get(PlotInputs,'Value');
@@ -801,7 +802,7 @@ end
                 
                 
                 s.Rate = w; 
-                lh = s.addlistener('DataAvailable',@PlotCallback);
+                lh = s.addlistener('DataAvailable',@ScopePlotCallback);
                 
                 % specify each channel's range
                 for i = 1:length(s.Channels)
@@ -824,6 +825,26 @@ end
         end   
     end
 
+    function [] = ScopePlotCallback(src,event)
+        sz = size(scope_plot_data);
+        
+        % figure out the size of the data increment      
+        dsz = length(event.Data);
+        
+        % throw out the first bit of scope_plot_data
+        scope_plot_data(:,1:dsz) = [];
+        
+        % append the new data to the end
+        scope_plot_data = [scope_plot_data event.Data'];
+        
+        
+        
+        for si = ScopeThese
+            plot(ScopeHandles(si),time,scope_plot_data(si,:));
+        end
+    end
+
+
 %% plot live data to scopes and grab data
     function [] = PlotCallback(src,event)
         sz = size(scope_plot_data);
@@ -836,15 +857,9 @@ end
         
         % ...but plot only the ones requested
         if gui
+            % if this is being called as part of an experiment, use
+            % EpochPlot
             EpochPlot(ScopeHandles(ScopeThese),ScopeThese,time,scope_plot_data,Epochs);
-            for si = ScopeThese
-                nEpochs = unique(Epochs);
-                
-                   % plot(ScopeHandles(si),time,scope_plot_data(si,:));
-                
-                
-
-            end
             trial_running = trial_running - 1;
         else
             if rand>0.9
