@@ -48,7 +48,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_90_';
+VersionName= 'Kontroller v_91_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -212,8 +212,14 @@ if gui
     ViewControlParadigmButton = uicontrol(ParadigmPanel,'Position',[52,120,45,30],'Style','pushbutton','String','View','Callback',@ViewControlParadigm);
     RemoveControlParadigmsButton = uicontrol(ParadigmPanel,'Position',[100,120,60,30],'Style','pushbutton','String','Remove','Callback',@RemoveControlParadigms);
 
-
-    SamplingRateControl = uicontrol(f1,'Position',[133 5 50 20],'Style','edit','String','1000');
+    % check to see if sampling rate is stored. 
+    if exist('Kontroller.SamplingRate.mat','file') == 2
+        load('Kontroller.SamplingRate.mat');
+    else
+        % default
+        w = 1000;
+    end
+    SamplingRateControl = uicontrol(f1,'Position',[133 5 50 20],'Style','edit','String',mat2str(w),'Callback',@SamplingRateCallback);
     uicontrol(f1,'Position',[20 5 100 20],'Style','text','String','Sampling Rate');
     RunTrialButton = uicontrol(f1,'Position',[320 5 110 50],'Enable','off','BackgroundColor',[0.8 0.9 0.8],'Style','pushbutton','String','RUN w/o saving','FontWeight','bold','Callback',@RunTrial);
 
@@ -767,6 +773,14 @@ function [] = OutputConfigCallback(eo,ed)
          save('Kontroller.Config.Output.Digital.mat','DigitalOutputChannelNames','UsedDigitalOutputChannels');
         
 end
+
+%% Sampling Rate Callback
+    function [] = SamplingRateCallback(~,~)
+        w = str2double(get(SamplingRateControl,'String'));
+        % write to file
+        save('Kontroller.SamplingRate.mat','w')
+    end
+
 
 %% oscilloscope callback
     function  [] = ScopeCallback(eo,ed)
