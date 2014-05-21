@@ -256,7 +256,7 @@ if gui
     RandomizeControl = uicontrol(AutomatePanel,'Style','popupmenu','String',{'Randomise','Interleave','Block','Reverse Block','Custom'},'Value',2,'FontSize',8,'Position',[5 50 100 20],'Callback',@RandomiseControlCallback);
 
 
-    ManualControlButton = uicontrol(f1,'Position',[10 230 170 30],'Enable','on','Style','pushbutton','String','Manual Control','Callback',@ManualControlCallback);
+    ManualControlButton = uicontrol(f1,'Position',[10 230 170 30],'Enable','off','Style','pushbutton','String','Manual Control','Callback',@ManualControlCallback);
     MetadataButton = uicontrol(f1,'Position',[10 270 170 30],'Enable','on','Style','pushbutton','String','Add Metadata...','Callback',@MetadataCallback);
 
     waitbar(0.4,wh,'Generating global variables...'); figure(wh)
@@ -1471,7 +1471,7 @@ end
         save(ControlParadigmSaveToFile,'ControlParadigm');
     end
 
-%% load saved paradigms
+%% load saved control paradigms
     function [] = LoadSavedParadigms(eo,ed)
         [FileName,PathName] = uigetfile('*_Kontroller_paradigm*');
         temp=load(strcat(PathName,FileName));
@@ -1506,7 +1506,7 @@ end
         else
             set(RunTrialButton,'enable','on','String','RUN and SAVE','BackgroundColor',[0.1 0.9 0.1]);
         end
-        
+        delete(fcs)
     end
 
 %% metadata callback
