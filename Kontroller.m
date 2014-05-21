@@ -1,15 +1,13 @@
 % Kontroller.m
-% Kontroller is at https://bitbucket.org/srinivasgs/kontroller
+% Kontroller is at http://github.com/sg-s/kontroller/
 % 
-% 
-% 
-% created by Srinivas Gorur-Shandilya at 10:20 , 09 April 2014. Contact me at http://srinivas.gs/contact/
+% created by Srinivas Gorur-Shandilya. Contact me at http://srinivas.gs/contact/
 % 
 % This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. 
 % To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/.
 %
-% ===How to use Kontroller===
-%
+% === 1. Basic Use ===
+% 
 % 1. run Kontroller by typing "Kontroller"
 % 2. Kontroller will automatically detect NI hardware and determine
 % which channels you can use
@@ -21,7 +19,7 @@
 % it something in the text field. Analogue on left, digital on right.
 % 5. click on "configure controls". you should have vectors corresponding
 % to the control singals you want to write in your workspace. choose which
-% vector is written to which channel. Call the entire set with a certain
+% vector is written to which channel. Call the entire set (a ControlParadigm) with a certain
 % name, and click "DONE". Close the window if you're done adding control
 % paradigms. 
 % 6. Set an appropriate sampling rate. default is 1kHz. 
@@ -32,19 +30,39 @@
 % 9. If you want to run a trial, choose a control paradigm from the paradigm list
 % and press "run"
 % 10. Kontroller will save all data as .mat files in c:\data\
-% 
-% === dependencies===
-% 
-% listed in the code, search for "dependencies"
 %
-% ===Known issues in this version===
+% === 2. Advanced Use: ControlParadigms ===
 %
-% issue tracking at https://bitbucket.org/srinivasgs/kontroller/issues
+% 1. You can create your own ControlParadigms and save them to file, such
+% that the name contains the string "*_Kontroller_paradigm*". Make sure
+% this file contains a structure called ControlParadigm, where each element
+% of the structure has a MxN array called Outputs, where M is the number of
+% channels you want to write to, and N is the number of samples. Each
+% element of ControlParadigm should also have a field called "Name" that is
+% the name of the ControlParadigm. 
+% 
+% === 3.  Expert Use: Scripting Kontroller=
+%
+% Kontroller can be called as a function from your own script. 
+% 
+% Example Usage:
+% 
+% data = Kontroller('ControlParadigm',ControlParadigm,'RunTheseParadigms',[1 3],'w',1000);
+%
+% will run paradigms 1 and 3 in the ControlParadiagm Structure at 1000Hz
+% and return the recorded data to a structure called data. 
+%
+% Note that you will have to use the GUI to configure inputs and outputs.
+% Remember that the number of output channels must match the
+% ControlParadigm! 
+% 
 % 
 % ===Help, bug reports, contact and suggestions===
-% ./  
+% 
 % you should write to me at kontroller@srinivas.gs
 %
+% See also:
+% http://github.com/sg-s/kontroller
 
 
 function [data] = Kontroller(varargin)
@@ -1203,7 +1221,7 @@ end
             subplot(nrows,ncols,vi); hold on
             plot(t,ControlParadigm(get(ParadigmListDisplay,'Value')).Outputs(vi,:),'LineWidth',2);
             set(gca,'XLim',[0 max(t)])
-            title(ocn{vi},'FontSize',20)
+            title(ocn{vi},'FontSize',20,'Interpreter','none')
         end
         PrettyFig('EqualiseY =1;','fs=18;')
         
