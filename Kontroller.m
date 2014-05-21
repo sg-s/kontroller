@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_93_';
+VersionName= 'Kontroller v_94_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -250,6 +250,7 @@ if gui
     RepeatNTimesControl = uicontrol(AutomatePanel,'Style','edit','FontSize',8,'String','1','Position',[110 140 30 30]);
     RunProgramButton = uicontrol(AutomatePanel,'Position',[4 5 110 30],'Enable','off','Style','pushbutton','String','RUN PROGRAM','Callback',@RunProgram);
     PauseProgramButton = uicontrol(AutomatePanel,'Position',[124 5 80 30],'Enable','off','Style','togglebutton','String','PAUSE','Callback',@PauseProgram);
+    AbortProgramButton = uicontrol(AutomatePanel,'Position',[124 40 80 30],'Enable','off','Style','togglebutton','String','ABORT');
 
     uicontrol(AutomatePanel,'Style','text','FontSize',8,'String','Do this between trials:','Position',[1 70 100 50])
     InterTrialIntervalControl = uicontrol(AutomatePanel,'Style','edit','FontSize',8,'String','pause(20)','Position',[110 100 100 30]);
@@ -1057,6 +1058,8 @@ end
     function [] = RunProgram(eo,ed)
         % make sure pause programme button is enabled
         set(PauseProgramButton,'Enable','on');
+        set(AbortProgramButton,'Enable','on');
+        
         
         % check if pause is required
         if get(PauseProgramButton,'Value') 
@@ -1066,103 +1069,131 @@ end
             pause(0.1)
         end
 
-            
+        if ~get(AbortProgramButton,'Value')    
         
-        % figure out how many trials have been run so far
-        if isempty(sequence)
-            % start the timer
-            tic
-            % make the sequence
-            np = get(ParadigmListDisplay,'Value');
-            
-            ntrials= str2num(get(RepeatNTimesControl,'String'));
-            
-            % figure out how to arrange paradigms
-            switch get(RandomizeControl,'Value') 
-                case 1
-                    % randomise
-                    sequence = repmat(np,1,ntrials);
-                    sequence = sequence(randperm(length(sequence),length(sequence)));
-                case 2
-                    % interleave
-                    sequence = repmat(np,1,ntrials);
-                case 3
-                    % block
-                    sequence =  reshape((np'*ones(1,ntrials))',1,ntrials*length(np));
-                case 4
-                    % reverse block
-                    sequence =  reshape((np'*ones(1,ntrials))',1,ntrials*length(np));
-                    sequence = fliplr(sequence);
-                case 5
-                    % arbitrary
-                    if ~isempty(CustomSequence)
-                        sequence =  str2num(CustomSequence{1}); %#ok<ST2NM>
-                    else
-                        error('Cannot find custom sequence.')
-                    end
-                    
-            end
-              
-            
-            sequence_step = 1;
-            programme_running = 1;
-            set(RunProgramButton,'Enable','off')
-            set(RunTrialButton,'Enable','off')
-        end
+            % figure out how many trials have been run so far
+            if isempty(sequence)
+                % start the timer
+                tic
+                % make the sequence
+                np = get(ParadigmListDisplay,'Value');
+
+                ntrials= str2num(get(RepeatNTimesControl,'String'));
+
+                % figure out how to arrange paradigms
+                switch get(RandomizeControl,'Value') 
+                    case 1
+                        % randomise
+                        sequence = repmat(np,1,ntrials);
+                        sequence = sequence(randperm(length(sequence),length(sequence)));
+                    case 2
+                        % interleave
+                        sequence = repmat(np,1,ntrials);
+                    case 3
+                        % block
+                        sequence =  reshape((np'*ones(1,ntrials))',1,ntrials*length(np));
+                    case 4
+                        % reverse block
+                        sequence =  reshape((np'*ones(1,ntrials))',1,ntrials*length(np));
+                        sequence = fliplr(sequence);
+                    case 5
+                        % arbitrary
+                        if ~isempty(CustomSequence)
+                            sequence =  str2num(CustomSequence{1}); %#ok<ST2NM>
+                        else
+                            error('Cannot find custom sequence.')
+                        end
+
+                end
 
 
-        if sequence_step < length(sequence) + 1
-            % update time estimates
-            t=toc;
-            if t < 2
-                % programme just started
-                ks = strkat('Running inter-trial function....');
-            else
-                tt=(t/(sequence_step-1))*length(sequence) - t; % time remaining
-                tt=oval(tt,2);
-                t=oval(toc,2);
-                ks = strkat('Running inter-trial function....','\n','Elapsed time is :', (t), 'seconds'...
-               ,'\n',(tt),'seconds remain');
+                sequence_step = 1;
+                programme_running = 1;
+                set(RunProgramButton,'Enable','off')
+                set(RunTrialButton,'Enable','off')
             end
-            
-            
-            % run inter-trial function
-            iti = (get(InterTrialIntervalControl,'String'));
-            set(Konsole,'String',ks)
-            eval(iti)
-            
-            % check if pause is required
-            if get(PauseProgramButton,'Value') 
-                set(PauseProgramButton,'String','PAUSED')
-            end
-            while get(PauseProgramButton,'Value') == 1  
+
+
+            if sequence_step < length(sequence) + 1
+                % update time estimates
+                t=toc;
+                if t < 2
+                    % programme just started
+                    ks = strkat('Running inter-trial function....');
+                else
+                    tt=(t/(sequence_step-1))*length(sequence) - t; % time remaining
+                    tt=oval(tt,2);
+                    t=oval(toc,2);
+                    ks = strkat('Running inter-trial function....','\n','Elapsed time is :', (t), 'seconds'...
+                   ,'\n',(tt),'seconds remain');
+                end
+
+
+                % run inter-trial function
+                iti = (get(InterTrialIntervalControl,'String'));
+                set(Konsole,'String',ks)
+                eval(iti)
+
+                % check if pause is required
+                if get(PauseProgramButton,'Value') 
+                    set(PauseProgramButton,'String','PAUSED')
+                end
+                while get(PauseProgramButton,'Value') == 1  
+                    pause(0.1)
+                end
+
+
+                % run the correct step of the sequence
+                set(ParadigmListDisplay,'Value',sequence(sequence_step));
+                sequence_step = sequence_step + 1;
+                RunTrial; 
+
+            else  
+                % programme has finished running
+                programme_running = 0;
+                set(Konsole,'String','Programme has finished running.')
+                set(RunProgramButton,'Enable','on')
+                set(RunTrialButton,'Enable','on')
+                set(PauseProgramButton,'Enable','off')
+                set(AbortProgramButton,'Enable','off');
+
+                % re-select the initially selected paradgims
+                set(ParadigmListDisplay,'Value',unique(sequence));
+
+                sequence = [];
+                sequence_step = [];
+
+                beep
                 pause(0.1)
+                beep
+
+
             end
-
-
-            % run the correct step of the sequence
-            set(ParadigmListDisplay,'Value',sequence(sequence_step));
-            sequence_step = sequence_step + 1;
-            RunTrial; 
-           
-        else  
-            % programme has finished running
+        else
+            % abort!
             programme_running = 0;
-            set(Konsole,'String','Programme has finished running.')
+            set(Konsole,'String','Programme has been aborted!')
             set(RunProgramButton,'Enable','on')
             set(RunTrialButton,'Enable','on')
             set(PauseProgramButton,'Enable','off')
-            
+            set(AbortProgramButton,'Enable','off');
+
             % re-select the initially selected paradgims
-            set(ParadigmListDisplay,'Value',unique(sequence));
-            
+            try
+                set(ParadigmListDisplay,'Value',unique(sequence));
+            catch
+            end
+
             sequence = [];
             sequence_step = [];
-            
+
+            beep
             beep
             pause(0.1)
             beep
+            beep
             
+            set(AbortProgramButton,'Value',0)
             
         end
     end
