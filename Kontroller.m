@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_92_';
+VersionName= 'Kontroller v_93_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -999,7 +999,9 @@ end
         temp=strcat(datestr(now,'yyyy_mm_dd'),'_customname.mat');
         SaveToFile=uiputfile(strcat('C:\data\',temp));
         % activate the run buttons
-        set(RunTrialButton,'enable','on','BackgroundColor',[0.1 0.9 0.1],'String','RUN and SAVE');
+        if length(get(ParadigmListDisplay,'Value')) == 1
+            set(RunTrialButton,'enable','on','BackgroundColor',[0.1 0.9 0.1],'String','RUN and SAVE');
+        end
         set(RunProgramButton,'enable','on');
         % update display
         set(FileNameDisplay,'String',SaveToFile);
@@ -1016,7 +1018,9 @@ end
     function [] = SaveToFileTextEdit(eo,ed)
         if isempty(get(FileNameDisplay,'String'))
             % no destination
-            set(RunTrialButton,'enable','on','BackgroundColor',[0.9 0.1 0.1],'String','RUN w/o saving');
+            if length(get(ParadigmListDisplay,'Value')) == 1
+                set(RunTrialButton,'enable','on','BackgroundColor',[0.9 0.1 0.1],'String','RUN w/o saving');
+            end
         else
             if exist(strcat('c:\data\',get(FileNameDisplay,'String')),'file')
                 % file already exists, will overwrite
@@ -1025,7 +1029,9 @@ end
                 % new file
                 set(FileNameDisplay,'ForegroundColor','k')
             end
-            set(RunTrialButton,'enable','on','BackgroundColor',[0.1 0.9 0.1],'String','RUN and SAVE');
+            if length(get(ParadigmListDisplay,'Value')) == 1
+                set(RunTrialButton,'enable','on','BackgroundColor',[0.1 0.9 0.1],'String','RUN and SAVE');
+            end
             % reset Trial count
             Trials = zeros(1,length(ControlParadigmList)); 
             % reset timestamps
