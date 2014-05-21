@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_91_';
+VersionName= 'Kontroller v_92_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -1184,9 +1184,9 @@ end
         else 
             set(ViewControlParadigmButton,'Enable','on');
             % check if destination is OK
-            if ~isempty(SaveToFile)
+            
                 set(RunTrialButton,'Enable','on');
-            end
+            
         end
         if Trials(get(ParadigmListDisplay,'Value'))
             showthis = strkat(mat2str(Trials(get(ParadigmListDisplay,'Value'))),'  trials recorded on selected Paradigm(s)');
