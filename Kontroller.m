@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_94_';
+VersionName= 'Kontroller v_95_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -192,6 +192,7 @@ CustomSequence = [];
 
 
 %% initlaise some metadata
+ waitbar(0.3,wh,'Talking to NI DAQ. This may take time...'); figure(wh)
 metadata.DateTime = datestr(now);
 d = daq.getDevices;
 metadata.daqName = d.Model;
@@ -210,7 +211,7 @@ set(MetadataTextControl,'String','');
 if gui
 
     f1 = figure('Position',[20 60 450 700],'Toolbar','none','Menubar','none','Name',VersionName,'NumberTitle','off','Resize','off','HandleVisibility','on','CloseRequestFcn',@QuitKontrollerCallback);
-    waitbar(0.3,wh,'Generating UI...'); figure(wh)
+    waitbar(0.4,wh,'Generating UI...'); figure(wh)
     Konsole = uicontrol('Position',[15 600 425 90],'Style','text','String','Kontroller is starting...','FontName','Courier','HorizontalAlignment','left');
     ConfigureInputChannelButton = uicontrol('Position',[15 540 140 50],'Style','pushbutton','Enable','off','String','Configure Inputs','FontSize',10,'Callback',@ConfigureInputChannels);
     ConfigureOutputChannelButton = uicontrol('Position',[160 540 140 50],'Style','pushbutton','Enable','off','String','Configure Outputs','FontSize',10,'Callback',@ConfigureOutputChannels);
@@ -260,7 +261,7 @@ if gui
     ManualControlButton = uicontrol(f1,'Position',[10 230 170 30],'Enable','off','Style','pushbutton','String','Manual Control','Callback',@ManualControlCallback);
     MetadataButton = uicontrol(f1,'Position',[10 270 170 30],'Enable','on','Style','pushbutton','String','Add Metadata...','Callback',@MetadataCallback);
 
-    waitbar(0.4,wh,'Generating global variables...'); figure(wh)
+    waitbar(0.5,wh,'Generating global variables...'); figure(wh)
     StartScopes = uicontrol(f1,'Position',[260 465 150 50],'Style','pushbutton','Enable','off','String','Start Scopes','FontSize',12,'Callback',@ScopeCallback);
     scsz = get(0,'ScreenSize');
     scope_fig = figure('Position',[500 100 scsz(3)-500 scsz(4)-200],'Toolbar','none','Name','Oscilloscope','NumberTitle','off','Resize','on','Visible','off','CloseRequestFcn',@QuitKontrollerCallback); hold on; 
@@ -270,7 +271,7 @@ end
 %% figure out DAQ characteristics and initialise
 
 if gui
-    waitbar(0.5,wh,'Scanning hardware...'); figure(wh)
+    waitbar(0.6,wh,'Scanning hardware...'); figure(wh)
 else
     disp('Scanning hardware...')
 end
@@ -279,7 +280,11 @@ if gui
     figure(wh)
 end
 
-OutputChannels =  d.Subsystems(2).ChannelNames;
+try
+    OutputChannels =  d.Subsystems(2).ChannelNames;
+catch
+    error('Something went wrong when trying to talk to the NI device. This is probably because it is not plugged in propoerly.')
+end
 nOutputChannels = length(OutputChannels);
 InputChannels =  d.Subsystems(1).ChannelNames;
 nInputChannels = length(InputChannels);
@@ -294,7 +299,7 @@ UsedOutputChannels = [];
 OutputChannelNames = {}; % this is the user defined names
 
 if gui
-    waitbar(0.6,wh,'Checking for input config...'); figure(wh)
+    waitbar(0.7,wh,'Checking for input config...'); figure(wh)
 end
 % load saved configs...inputs
 if ~isempty(dir('Kontroller.Config.Input.mat'))
@@ -327,7 +332,7 @@ if ~isempty(dir('Kontroller.Config.SamplingRate.mat'))
 end
 
 if gui
-    waitbar(0.7,wh,'Checking for output config...'); figure(wh)
+    waitbar(0.8,wh,'Checking for output config...'); figure(wh)
 end
 % load saved configs..outputs
 if gui
