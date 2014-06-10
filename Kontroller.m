@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_96_';
+VersionName= 'Kontroller v_97_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -191,6 +191,7 @@ metadata = [];  % stores metadata associated with the whole file.
 timestamps = []; % first column stores the paradigm #, the second the trial #, and the third the timestamp
 Epochs = [];
 CustomSequence = [];
+webcam_buffer = []; % this is a structure used to properly pack images into data
 
 
 %% initlaise some metadata
@@ -502,6 +503,20 @@ end
         preview(cam);
     end
 
+
+%% take a picture with the webcam
+    function [pic, webcam_metadata] = TakePicture(eo,ed)
+        % choose the maximum resolution
+        ar=get(cam,'AvailableResolutions');
+        set(cam,'Resolution',ar{end});
+        webcam_metadata=get(cam);
+        pic = snapshot(cam);
+        wf=figure; hold on;
+        imagesc(pic); axis ij
+        pause(2);
+        close(wf);
+        
+    end
 
 %% configure outputs
     function [] =ConfigureOutputChannels(eo,ed)
@@ -1073,7 +1088,8 @@ end
         end
             
     end
-%% RandimzeControl Callbacl -- for custom sequence
+
+%% RandimzeControl Callback -- for custom sequence
     function [] = RandomiseControlCallback(eo,ed)
         % get sequence
         if  get(RandomizeControl,'Value') == 5
@@ -1295,6 +1311,7 @@ end
 
 %% run trial
     function [] = RunTrial(eo,ed) 
+        webcam_buffer = [];
 
         % disable all buttons
         set(ConfigureInputChannelButton,'Enable','off');
@@ -1310,6 +1327,7 @@ end
         set(RemoveControlParadigmsButton,'Enable','off');
         
         ComputeEpochs;
+        
         
         
         
@@ -1418,6 +1436,12 @@ end
         timestamps(2,ts(2)+1)=Trials(ThisParadigm); % trial number
         timestamps(3,ts(2)+1)=(now); % time
         
+        % if needed, take a picture before starting the trial.
+        if find(strcmp('Before',ControlParadigm(ThisParadigm).Webcam))
+            [webcam_buffer(1).pic, webcam_buffer(1).m] = TakePicture;
+            webcam_buffer(1).timestamp = now;
+        end
+        
         % read and write
         trial_running = T*10;
         try
@@ -1428,10 +1452,19 @@ end
             errordlg('Kontroller could not start the task. This is probably because the hardware is reserved. You need to restart Kontroller. Sorry about that. Type "return" and hit enter to restart.')
             clear all
             exit
-            
-            
         end
+        
+        
+        % if needed, take a picture after finishing the trial.
+
+        if find(strcmp('After',ControlParadigm(ThisParadigm).Webcam))
+            [webcam_buffer(2).pic, webcam_buffer(2).m] = TakePicture;
+            webcam_buffer(2).timestamp = now;
+        end
+        
         ProcessTrialData;
+        
+        
 
         set(ConfigureInputChannelButton,'Enable','on');
         set(ConfigureOutputChannelButton,'Enable','on');
@@ -1501,9 +1534,6 @@ end
         % save data to file
         if gui
             SamplingRate= str2double(get(SamplingRateControl,'String'));
-        end
-        
-        if gui
             temp = OutputChannelNames;
             OutputChannelNames = {OutputChannelNames{UsedOutputChannels} DigitalOutputChannelNames{UsedDigitalOutputChannels}};
             save(strcat('C:\data\',SaveToFile),'data','ControlParadigm','metadata','OutputChannelNames','SamplingRate','timestamps');       
@@ -1512,6 +1542,19 @@ end
             set(RunTrialButton,'Enable','on','String','RUN and SAVE');      
             set(Konsole,'String',strkat('Trial ',mat2str(Trials(ThisParadigm)),'/Paradigm ',mat2str(ThisParadigm),' completed.'));
         end
+        
+        % pack webcam data correctly
+        if ~isempty(webcam_buffer)
+            for wi = 1:length(webcam_buffer)
+                if isfield(data(ThisParadigm),'webcam')
+                    keyboard
+                else
+                    % no webcam info
+                    data(ThisParadigm).webcam = webcam_buffer(wi);
+                end
+            end
+        end
+        
         % check to make sure that the session has stopped
         if s.IsRunning
             s.stop;
