@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_95_';
+VersionName= 'Kontroller v_96_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -109,6 +109,7 @@ else
 end
 clear j
 
+
 % check for internal dependencies
 dependencies = {'oval','strkat','PrettyFig','CheckForNewestVersionOnGitHub'};
 for i = 1:length(dependencies)
@@ -144,6 +145,7 @@ end
  
 % session handles
 s=[]; % this is the session ID
+cam = []; % this is the object of the webcam
 
 % listeners
 lh = []; % generic listener ID
@@ -192,7 +194,9 @@ CustomSequence = [];
 
 
 %% initlaise some metadata
- waitbar(0.3,wh,'Talking to NI DAQ. This may take time...'); figure(wh)
+if gui
+    waitbar(0.3,wh,'Talking to NI DAQ. This may take time...'); figure(wh)
+end
 metadata.DateTime = datestr(now);
 d = daq.getDevices;
 metadata.daqName = d.Model;
@@ -211,6 +215,8 @@ set(MetadataTextControl,'String','');
 if gui
 
     f1 = figure('Position',[20 60 450 700],'Toolbar','none','Menubar','none','Name',VersionName,'NumberTitle','off','Resize','off','HandleVisibility','on','CloseRequestFcn',@QuitKontrollerCallback);
+    WebcamMenu = uimenu(f1,'Label','Webcam','Enable','off');
+    PreviewWebcamItem = uimenu(WebcamMenu,'Label','Preview','Callback',@PreviewWebcam);
     waitbar(0.4,wh,'Generating UI...'); figure(wh)
     Konsole = uicontrol('Position',[15 600 425 90],'Style','text','String','Kontroller is starting...','FontName','Courier','HorizontalAlignment','left');
     ConfigureInputChannelButton = uicontrol('Position',[15 540 140 50],'Style','pushbutton','Enable','off','String','Configure Inputs','FontSize',10,'Callback',@ConfigureInputChannels);
@@ -370,10 +376,19 @@ if ~isempty(dir('Kontroller.Config.Output.Digital.mat'))
     
 end
 if gui
-    waitbar(1,wh,'DONE.'); figure(wh)
+    waitbar(0.9,wh,'Looking for webcams...'); figure(wh)
+
     set(ConfigureInputChannelButton,'Enable','on')
     set(ConfigureOutputChannelButton,'Enable','on')
-    set(Konsole,'String',strkat('Kontroller is ready to use. \n','Hardware detected: \n',d.Vendor.FullName,'-',d.Model))
+    if isempty(webcamlist)
+        disp('No webcams detected.')
+        set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d.Vendor.FullName,'-',d.Model))
+    
+    else
+        cam=webcam(1);
+        set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d.Vendor.FullName,'-',d.Model,'\nWebcam detected: ',cam.Name))
+        set(WebcamMenu,'Enable','on')
+    end
     close(wh)
     set(scope_fig,'Visible','on')
 end
@@ -478,6 +493,15 @@ end
         end
     
     end
+
+%% preview webcam
+    function [] = PreviewWebcam(eo,ed)
+        % choose the maximum resolution
+        ar=get(cam,'AvailableResolutions');
+        set(cam,'Resolution',ar{end});
+        preview(cam);
+    end
+
 
 %% configure outputs
     function [] =ConfigureOutputChannels(eo,ed)
