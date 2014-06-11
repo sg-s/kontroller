@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_97_';
+VersionName= 'Kontroller v_98_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -1437,9 +1437,11 @@ end
         timestamps(3,ts(2)+1)=(now); % time
         
         % if needed, take a picture before starting the trial.
-        if find(strcmp('Before',ControlParadigm(ThisParadigm).Webcam))
-            [webcam_buffer(1).pic, webcam_buffer(1).m] = TakePicture;
-            webcam_buffer(1).timestamp = now;
+        if isfield(ControlParadigm(ThisParadigm),'Webcam')
+            if find(strcmp('Before',ControlParadigm(ThisParadigm).Webcam))
+                [webcam_buffer(1).pic, webcam_buffer(1).m] = TakePicture;
+                webcam_buffer(1).timestamp = now;
+            end
         end
         
         % read and write
@@ -1456,10 +1458,11 @@ end
         
         
         % if needed, take a picture after finishing the trial.
-
-        if find(strcmp('After',ControlParadigm(ThisParadigm).Webcam))
-            [webcam_buffer(2).pic, webcam_buffer(2).m] = TakePicture;
-            webcam_buffer(2).timestamp = now;
+        if isfield(ControlParadigm(ThisParadigm),'Webcam')
+            if find(strcmp('After',ControlParadigm(ThisParadigm).Webcam))
+                [webcam_buffer(2).pic, webcam_buffer(2).m] = TakePicture;
+                webcam_buffer(2).timestamp = now;
+            end
         end
         
         ProcessTrialData;
@@ -1547,6 +1550,7 @@ end
         if ~isempty(webcam_buffer)
             for wi = 1:length(webcam_buffer)
                 if isfield(data(ThisParadigm),'webcam')
+                    disp('need to code this case 1550')
                     keyboard
                 else
                     % no webcam info
