@@ -301,7 +301,7 @@ end
 try
     OutputChannels =  d.Subsystems(2).ChannelNames;
 catch
-    error('Something went wrong when trying to talk to the NI device. This is probably because it is not plugged in propoerly.')
+    error('Something went wrong when trying to talk to the NI device. This is probably because it is not plugged in properly.')
 end
 nOutputChannels = length(OutputChannels);
 InputChannels =  d.Subsystems(1).ChannelNames;
@@ -1258,7 +1258,7 @@ end
             beep
             
             set(AbortProgramButton,'Value',0)
-            
+            set(AbortProgramButton,'String','ABORT')
         end
     end
 
@@ -1374,7 +1374,7 @@ end
         time=(1/w):(1/w):(length(ControlParadigm(ThisParadigm).Outputs)/w);
         
         % figure out trial no
-        if ~length(data)
+        if isempty(data)
             % no data at all
             Trials(ThisParadigm) = 1;
             set(Konsole,'String',strkat('Running Trial: \n','Paradigm: \t \t  ',ControlParadigmList{ThisParadigm},'\n Trial: \t \t ','1'))
@@ -1396,7 +1396,7 @@ end
             
         end
         
-        w=str2num(get(SamplingRateControl,'String'));
+        w=str2num(get(SamplingRateControl,'String')); %#ok<ST2NM>
         if isempty(w)
             error('Sampling Rate not defined!')
         end
@@ -1567,6 +1567,20 @@ end
 
         end
             
+        % pack webcam data correctly
+        if ~isempty(webcam_buffer)
+            for wi = 1:length(webcam_buffer)
+                if isfield(data(ThisParadigm),'webcam')
+                    data(ThisParadigm).webcam(length(data(ThisParadigm).webcam)+1) = webcam_buffer;
+                else
+                    % no webcam info
+                    data(ThisParadigm).webcam = webcam_buffer(wi);
+                end
+            end
+        end
+        webcam_buffer = [];
+        
+        
         % save data to file
         if gui
             SamplingRate= str2double(get(SamplingRateControl,'String'));
@@ -1579,18 +1593,7 @@ end
             set(Konsole,'String',strkat('Trial ',mat2str(Trials(ThisParadigm)),'/Paradigm ',mat2str(ThisParadigm),' completed.'));
         end
         
-        % pack webcam data correctly
-        if ~isempty(webcam_buffer)
-            for wi = 1:length(webcam_buffer)
-                if isfield(data(ThisParadigm),'webcam')
-                    disp('need to code this case 1550')
-                    keyboard
-                else
-                    % no webcam info
-                    data(ThisParadigm).webcam = webcam_buffer(wi);
-                end
-            end
-        end
+        
         
         % check to make sure that the session has stopped
         if s.IsRunning
