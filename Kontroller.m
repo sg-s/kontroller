@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_98_';
+VersionName= 'Kontroller v_100_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -128,6 +128,11 @@ if gui
     catch
         disp('Could not check for updates.')
     end
+    
+    % see if wecam support exists
+    if verLessThan('matlab','8.3')
+        warning('No support for webcam image acquisition on this version of MATLAB.')
+    end
 end
 
 
@@ -168,6 +173,7 @@ ControlHandles= [];
 ParadigmNameUI = [];
 MCoi = []; 
 MCNumoi = []; % this is for manually entering a specific set point via a edit field
+plot_only_control = [];
 
 % internal control variables
 MCOutputData = [];
@@ -272,7 +278,11 @@ if gui
     StartScopes = uicontrol(f1,'Position',[260 465 150 50],'Style','pushbutton','Enable','off','String','Start Scopes','FontSize',12,'Callback',@ScopeCallback);
     scsz = get(0,'ScreenSize');
     scope_fig = figure('Position',[500 100 scsz(3)-500 scsz(4)-200],'Toolbar','none','Name','Oscilloscope','NumberTitle','off','Resize','on','Visible','off','CloseRequestFcn',@QuitKontrollerCallback); hold on; 
-
+    
+    uicontrol(scope_fig,'Style','text','FontSize',8,'String','Plot only last','Position',[100 scsz(4)-240 100 20])
+    plot_only_control=uicontrol(scope_fig,'Style','edit','FontSize',8,'String','Inf','Position',[200 scsz(4)-240 70 22]);
+    uicontrol(scope_fig,'Style','text','FontSize',8,'String','samples','Position',[270 scsz(4)-240 100 20])
+    
 end
 
 %% figure out DAQ characteristics and initialise
@@ -381,7 +391,10 @@ if gui
 
     set(ConfigureInputChannelButton,'Enable','on')
     set(ConfigureOutputChannelButton,'Enable','on')
-    if isempty(webcamlist)
+    if verLessThan('matlab','8.3')
+        set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d.Vendor.FullName,'-',d.Model))
+    else
+        if isempty(webcamlist)
         disp('No webcams detected.')
         set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d.Vendor.FullName,'-',d.Model))
     
@@ -390,6 +403,8 @@ if gui
         set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d.Vendor.FullName,'-',d.Model,'\nWebcam detected: ',cam.Name))
         set(WebcamMenu,'Enable','on')
     end
+    end
+    
     close(wh)
     set(scope_fig,'Visible','on')
 end
@@ -936,7 +951,10 @@ end
         if gui
             % if this is being called as part of an experiment, use
             % EpochPlot
-            EpochPlot(ScopeHandles(ScopeThese),ScopeThese,time,scope_plot_data,Epochs);
+            % control for very long stimuli, which causes plot functions to
+            % crash
+            plot_length = str2double(get(plot_only_control,'String'));
+            EpochPlot(ScopeHandles(ScopeThese),ScopeThese,time,scope_plot_data,Epochs,plot_length);
             trial_running = trial_running - 1;
         else
             if rand>0.9
@@ -1328,6 +1346,7 @@ end
         
         ComputeEpochs;
         
+
         
         
         
@@ -1343,6 +1362,13 @@ end
         set(RunTrialButton,'Enable','off','String','running...')
         % figure out which pradigm to run
         ThisParadigm= (get(ParadigmListDisplay,'Value'));
+        
+        % update plot_length
+        if length(ControlParadigm(ThisParadigm).Outputs) > 50000
+            if isinf(str2double(get(plot_only_control,'String')))
+                set(plot_only_control,'String','50000');
+            end
+        end
         
         time=(1/w):(1/w):(length(ControlParadigm(ThisParadigm).Outputs)/w);
         
