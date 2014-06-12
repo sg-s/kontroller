@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_100_';
+VersionName= 'Kontroller v_102_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -169,6 +169,7 @@ dlo = []; dro = []; % digital outputs handles
 MetadataTextControl= []; % handle for metadata control
 MetadataTextDisplay = []; % handle for metadata display
 ScopeHandles = [];
+PlotHandles = []; % plotHandles is used by EpochPlot to plot; useful because we reset data instead of actually replotting
 ControlHandles= [];
 ParadigmNameUI = [];
 MCoi = []; 
@@ -279,9 +280,9 @@ if gui
     scsz = get(0,'ScreenSize');
     scope_fig = figure('Position',[500 100 scsz(3)-500 scsz(4)-200],'Toolbar','none','Name','Oscilloscope','NumberTitle','off','Resize','on','Visible','off','CloseRequestFcn',@QuitKontrollerCallback); hold on; 
     
-    uicontrol(scope_fig,'Style','text','FontSize',8,'String','Plot only last','Position',[100 scsz(4)-240 100 20])
-    plot_only_control=uicontrol(scope_fig,'Style','edit','FontSize',8,'String','Inf','Position',[200 scsz(4)-240 70 22]);
-    uicontrol(scope_fig,'Style','text','FontSize',8,'String','samples','Position',[270 scsz(4)-240 100 20])
+    uicontrol(scope_fig,'Style','text','FontSize',8,'String','Plot only last','Position',[100 scsz(4)-220 100 20])
+    plot_only_control=uicontrol(scope_fig,'Style','edit','FontSize',8,'String','Inf','Position',[200 scsz(4)-220 70 22]);
+    uicontrol(scope_fig,'Style','text','FontSize',8,'String','samples','Position',[270 scsz(4)-220 100 20])
     
 end
 
@@ -954,7 +955,7 @@ end
             % control for very long stimuli, which causes plot functions to
             % crash
             plot_length = str2double(get(plot_only_control,'String'));
-            EpochPlot(ScopeHandles(ScopeThese),ScopeThese,time,scope_plot_data,Epochs,plot_length);
+            EpochPlot(ScopeHandles(ScopeThese),ScopeThese,time,scope_plot_data,Epochs,PlotHandles(ScopeThese),plot_length);
             trial_running = trial_running - 1;
         else
             if rand>0.9
@@ -1419,7 +1420,9 @@ end
         ti = 1;
         for i = ScopeThese
             ScopeHandles(i) = subplot(2,rows,ti); ti = ti+1;
-            set(ScopeHandles(i),'XLim',[0 T]), hold on
+            cla(ScopeHandles(i));
+            PlotHandles(i) = plot(NaN,NaN,'k');
+            set(ScopeHandles(i),'XLim',[0 T])
             plotname=strcat(InputChannels{UsedInputChannels(i)},'-',InputChannelNames{UsedInputChannels(i)});
             plotname = strrep(plotname,'_','-');
             title(plotname)
@@ -1463,10 +1466,12 @@ end
         timestamps(3,ts(2)+1)=(now); % time
         
         % if needed, take a picture before starting the trial.
-        if isfield(ControlParadigm(ThisParadigm),'Webcam')
-            if find(strcmp('Before',ControlParadigm(ThisParadigm).Webcam))
-                [webcam_buffer(1).pic, webcam_buffer(1).m] = TakePicture;
-                webcam_buffer(1).timestamp = now;
+        if ~verLessThan('matlab','8.3')
+            if isfield(ControlParadigm(ThisParadigm),'Webcam')
+                if find(strcmp('Before',ControlParadigm(ThisParadigm).Webcam))
+                    [webcam_buffer(1).pic, webcam_buffer(1).m] = TakePicture;
+                    webcam_buffer(1).timestamp = now;
+                end
             end
         end
         
@@ -1484,10 +1489,12 @@ end
         
         
         % if needed, take a picture after finishing the trial.
-        if isfield(ControlParadigm(ThisParadigm),'Webcam')
-            if find(strcmp('After',ControlParadigm(ThisParadigm).Webcam))
-                [webcam_buffer(2).pic, webcam_buffer(2).m] = TakePicture;
-                webcam_buffer(2).timestamp = now;
+        if ~verLessThan('matlab','8.3')
+            if isfield(ControlParadigm(ThisParadigm),'Webcam')
+                if find(strcmp('After',ControlParadigm(ThisParadigm).Webcam))
+                    [webcam_buffer(2).pic, webcam_buffer(2).m] = TakePicture;
+                    webcam_buffer(2).timestamp = now;
+                end
             end
         end
         
