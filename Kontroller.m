@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_102_';
+VersionName= 'Kontroller v_103_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -225,6 +225,7 @@ if gui
     f1 = figure('Position',[20 60 450 700],'Toolbar','none','Menubar','none','Name',VersionName,'NumberTitle','off','Resize','off','HandleVisibility','on','CloseRequestFcn',@QuitKontrollerCallback);
     WebcamMenu = uimenu(f1,'Label','Webcam','Enable','off');
     PreviewWebcamItem = uimenu(WebcamMenu,'Label','Preview','Callback',@PreviewWebcam);
+    AnnotateWebcamItem = uimenu(WebcamMenu,'Label','Annotate...','Callback',@LaunchImageAnnotator);
     waitbar(0.4,wh,'Generating UI...'); figure(wh)
     Konsole = uicontrol('Position',[15 600 425 90],'Style','text','String','Kontroller is starting...','FontName','Courier','HorizontalAlignment','left');
     ConfigureInputChannelButton = uicontrol('Position',[15 540 140 50],'Style','pushbutton','Enable','off','String','Configure Inputs','FontSize',10,'Callback',@ConfigureInputChannels);
@@ -456,6 +457,11 @@ if ~gui
         
     end
 end
+
+%% launch Image Annotator
+    function [] = LaunchImageAnnotator(eo,ed)
+        data=ImageAnnotator(strcat('C:\data\',SaveToFile));
+    end
 
 %% configure inputs
     function [] =ConfigureInputChannels(eo,ed)
