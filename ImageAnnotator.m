@@ -22,6 +22,7 @@ ImageHandles =[];
 ImageMenu = [];
 ImageAxis = [];
 PushButtonHandles = [];
+PointHandles =NaN(1,100);
 
 % make the GUI
 f1 = figure('Position',[60 60 1050 700],'Toolbar','none','Menubar','none','Name','Image Annotator','NumberTitle','off','Resize','on','HandleVisibility','on');
@@ -79,7 +80,6 @@ end
     function [] = SetImage(SelectedImage,~)
         ThisImage = find(ImageHandles == SelectedImage);
         axis(ImageAxis)
-        
         imagesc(data(ThisParadigm).webcam(ThisImage).pic);
         
         % show already annotated data if any
@@ -119,8 +119,15 @@ end
         % label the point in the image as such
         eval(strcat('data(ThisParadigm).webcam(ThisImage).',cell2mat(get(src,'String')),'=[x y];'));
         
+        % check if there was a previously marked point
+        if ~isnan(PointHandles(ThisPoint))
+            delete(PointHandles(ThisPoint))
+        end
+
         % add a marker to clarify things
-        scatter(x,y,64,c{ThisPoint},'filled');
+        PointHandles(ThisPoint)=scatter(x,y,64,c{ThisPoint},'filled');
+
+
     end
 
 
