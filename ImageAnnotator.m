@@ -142,6 +142,10 @@ uicontrol(f1,'Position',[930,430,50,50],'style','pushbutton','String','>','Visib
             end
             
         end
+
+        % label the image
+        titletext = strkat('Paradigm: ',ControlParadigm(ThisParadigm).Name,'  Image: ',mat2str(ThisImage));
+        title(ImageAxis,titletext)
         
     end
 
@@ -184,7 +188,7 @@ uicontrol(f1,'Position',[930,430,50,50],'style','pushbutton','String','>','Visib
     end
 
     function [] = SaveCallback(~,~)
-        t = msgbox('SAVING...')
+        t = msgbox('SAVING...');
         save(datafile,'data','-append');
         delete(t);
         msgbox('SAVED!')
