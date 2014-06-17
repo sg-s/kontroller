@@ -273,7 +273,7 @@ if gui
     RandomizeControl = uicontrol(AutomatePanel,'Style','popupmenu','String',{'Randomise','Interleave','Block','Reverse Block','Custom'},'Value',2,'FontSize',8,'Position',[5 50 100 20],'Callback',@RandomiseControlCallback);
 
 
-    ManualControlButton = uicontrol(f1,'Position',[10 230 170 30],'Enable','off','Style','pushbutton','String','Manual Control','Callback',@ManualControlCallback);
+    ManualControlButton = uicontrol(f1,'Position',[10 230 170 30],'Enable','on','Style','pushbutton','String','Manual Control','Callback',@ManualControlCallback);
     MetadataButton = uicontrol(f1,'Position',[10 270 170 30],'Enable','on','Style','pushbutton','String','Add Metadata...','Callback',@MetadataCallback);
 
     waitbar(0.5,wh,'Generating global variables...'); figure(wh)
@@ -614,20 +614,6 @@ end
 
 %% manual control callback
 function [] =ManualControlCallback(eo,ed)
-        % stop scopes
-        if scopes_running
-            % stop scopes
-            s.stop;
-            delete(lh);
-            % relabel scopes button
-            set(StartScopes,'String','Start Scopes');
-            scopes_running = 0;
-        end
-        % stop trial if necessary
-        if trial_running
-            error('Trial running, wait for trial to finish')
-        end
-        
         % make UI
         n = nOutputChannels;
         Height = 300;
@@ -662,47 +648,108 @@ function [] =ManualControlCallback(eo,ed)
             % odd number of channels
             error('Odd number of channels. Cant handle this')
         end
-        
-        % configure session
-        figure(scope_fig)   
-        s = daq.createSession('ni');
-        s.IsContinuous = true;
-        s.Rate = w; 
-        
-        % configure session inputs
-        s.NotifyWhenDataAvailableExceeds = 100; % 10Hz 
-        % update scope_plot_data
-        scope_plot_data = NaN(length(get(PlotInputs,'Value')),5000); % 5 s of  data in each channel
-        ScopeHandles = []; % axis handles for each sub plot in scope
-        rows = ceil(length(get(PlotInputs,'Value'))/2);
-        ScopeThese = get(PlotInputs,'Value');
-        for i = 1:length(get(PlotInputs,'Value'))
-            ScopeHandles(i) = subplot(2,rows,i);
-            plotname=strcat(InputChannels{UsedInputChannels(i)},'-',InputChannelNames{UsedInputChannels(i)});
-            ylabel(plotname)
-            set(ScopeHandles(i),'XLim',[0 5000]), hold on
-            s.addAnalogInputChannel('Dev1',InputChannels{UsedInputChannels(ScopeThese(i))}, 'Voltage'); % add channel
-        end
-        clear i
-        lh = s.addlistener('DataAvailable',@PlotCallback);
-        
-        
-        % configure session outputs
-        MCOutputData = zeros(length(UsedOutputChannels),500)'; 
-        TheseChannels=OutputChannels(UsedOutputChannels);
-        for i = 1:length(TheseChannels)
-             s.addAnalogOutputChannel('Dev1',OutputChannels{UsedOutputChannels(i)}, 'Voltage');
+        if isempty(PlotInputsList)
+        else
+            if scopes_running
+                % stop scopes
+                s.stop;
+                delete(lh);
+                % relabel scopes button
+                set(StartScopes,'String','Start Scopes');
+                scopes_running = 0;
+            else
+                % start scopes
+                figure(scope_fig)   
+                % create session
+                s = daq.createSession('ni');
+                s.IsContinuous = true;
+                s.NotifyWhenDataAvailableExceeds = w/10; % 10Hz
+                % update scope_plot_data
+                scope_plot_data = NaN(length(get(PlotInputs,'Value')),5*w); % 5 s of  data in each channel
+                time = (1/w):(1/w):5;
+                ScopeHandles = []; % axis handles for each sub plot in scope
+                rows = ceil(length(get(PlotInputs,'Value'))/2);
+                ScopeThese = get(PlotInputs,'Value');
+                for k = 1:length(get(PlotInputs,'Value'))
+                    ScopeHandles(k) = subplot(2,rows,k);
+                    set(ScopeHandles(k),'XLim',[0 5000]), hold off
+                    ylabel( strcat(InputChannels{UsedInputChannels(k)},' -- ',InputChannelNames{UsedInputChannels(k)}))
+                    s.addAnalogInputChannel('Dev1',InputChannels{UsedInputChannels(ScopeThese(k))}, 'Voltage'); % add channel
+                end
+                clear k
+                
+                TheseChannels=OutputChannels(UsedOutputChannels);
+                for k = 1:length(TheseChannels)
+                    s.addAnalogOutputChannel('Dev1',OutputChannels{UsedOutputChannels(k)}, 'Voltage');
         end
         clear i
         s.queueOutputData(MCOutputData);
-        %s.NotifyWhenScansQueuedBelow = 100; % this line causes random
-        %stops; don't know why
-        lhMC = s.addlistener('DataRequired',@(src,event) src.queueOutputData(MCOutputData));
-        
-        % start it
-        s.ExternalTriggerTimeout = 100;
-        s.startBackground();
-        scopes_running= 1;
+                
+                
+                s.Rate = w; 
+                lh = s.addlistener('DataAvailable',@ScopePlotCallback);
+                MCOutputData = zeros(length(UsedOutputChannels),length(time)); 
+
+                lhMC = s.addlistener('DataRequired',@(src,event) src.queueOutputData(MCOutputData'));
+                
+                % specify each channel's range
+                for i = 1:length(s.Channels)
+                    % figure out which channel it is
+                    [a,~]=ind2sub(size(InputChannels), strmatch(s.Channels(i).ID, InputChannels, 'exact'));
+                    s.Channels(i).Range = InputChannelRanges(a)*[-1 1];
+                end
+                clear i
+                
+                % fix scope labels
+                ScopeThese = 1:length(get(PlotInputs,'Value'));
+                
+                % relabel scopes button
+                set(StartScopes,'String','Stop Scopes');
+                s.startBackground();
+                scopes_running = 1;
+   
+            end
+       
+        end
+
+%         
+
+%         
+%         % configure session
+%         figure(scope_fig)   
+%         s = daq.createSession('ni');
+%         s.IsContinuous = true;
+%         s.Rate = w; 
+%         
+%         % configure session inputs
+%         s.NotifyWhenDataAvailableExceeds = 100; % 10Hz 
+%         % update scope_plot_data
+%         scope_plot_data = NaN(length(get(PlotInputs,'Value')),5000); % 5 s of  data in each channel
+%         ScopeHandles = []; % axis handles for each sub plot in scope
+%         rows = ceil(length(get(PlotInputs,'Value'))/2);
+%         ScopeThese = get(PlotInputs,'Value');
+%         for i = 1:length(get(PlotInputs,'Value'))
+%             ScopeHandles(i) = subplot(2,rows,i);
+%             plotname=strcat(InputChannels{UsedInputChannels(i)},'-',InputChannelNames{UsedInputChannels(i)});
+%             ylabel(plotname)
+%             set(ScopeHandles(i),'XLim',[0 5000]), hold on
+%             s.addAnalogInputChannel('Dev1',InputChannels{UsedInputChannels(ScopeThese(i))}, 'Voltage'); % add channel
+%         end
+%         clear i
+%         lh = s.addlistener('DataAvailable',@PlotCallback);
+%         
+%         
+%         % configure session outputs
+%         MCOutputData = zeros(length(UsedOutputChannels),500)'; 
+%        
+%         %s.NotifyWhenScansQueuedBelow = 100; % this line causes random
+%         %stops; don't know why
+%         lhMC = s.addlistener('DataRequired',@(src,event) src.queueOutputData(MCOutputData));
+%         
+%         % start it
+%         s.ExternalTriggerTimeout = 100;
+%         s.startBackground();
+%         scopes_running= 1;
         
         
 
@@ -712,19 +759,33 @@ end
 
 %% manual control slider and text entry callback
 % bug here -- slider doesnt work becauyse its overwritten by the text edit
-    function ManualControlSliderCallback(eo,ed)
-        for i = 1:length(UsedOutputChannels)
-            thisvalue = get(MCoi(i),'Value');
-            MCOutputData(:,i) = thisvalue*ones(500,1);
-        end
-        clear i
-        % now check text entry fields. this overrides the slider
-        for i = 1:length(UsedOutputChannels)
-            thisvalue = str2double(get(MCNumoi(i),'String'));
-            MCOutputData(:,i) = thisvalue*ones(500,1);
-        end
-        clear i
+    function ManualControlSliderCallback(src,~)
+         k=find(MCoi == src);
+         
+         if isempty(k)
+             k = find(MCNumoi == src);
+             
+             if isempty(k)
+                 error('What is being changed here? Something seriously wrong in Manual Control Callbacks.')
+             else
+                 % the text edit feild is being manipulated
+                 thisvalue = str2double(get(MCNumoi(k),'String'));
+                 MCOutputData(k,:) = thisvalue;
+                 
+                 % now move the slider to reflect the this
+                 set(MCoi(k),'Value',thisvalue);
+             end
+         else
+             % the slider is being changed
+              thisvalue = get(MCoi(k),'Value');
+              MCOutputData(k,:) = thisvalue;
+              
+              % now update the text edit value to reflect this
+              set(MCNumoi(k),'String',oval(thisvalue,2))
+         end
+         
         
+
         delete(lhMC)
         lhMC = s.addlistener('DataRequired',@(src,event) src.queueOutputData(MCOutputData));
         
@@ -1741,6 +1802,9 @@ end
         
         delete(gcf)
         scopes_running=0;
+        
+        % relabel scopes button
+        set(StartScopes,'String','Start Scopes');
 
     end
 
