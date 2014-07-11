@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_104_';
+VersionName= 'Kontroller v_105_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -281,6 +281,10 @@ if gui
     scsz = get(0,'ScreenSize');
     scope_fig = figure('Position',[500 100 scsz(3)-500 scsz(4)-200],'Toolbar','none','Name','Oscilloscope','NumberTitle','off','Resize','on','Visible','off','CloseRequestFcn',@QuitKontrollerCallback); hold on; 
     
+    
+    % scope figure controls
+    ParadigmMenu = uimenu(scope_fig,'Label','Paradigm','Enable','off');
+    TrialMenu = uimenu(scope_fig,'Label','Trial #','Enable','off');
     uicontrol(scope_fig,'Style','text','FontSize',8,'String','Plot only last','Position',[100 scsz(4)-220 100 20])
     plot_only_control=uicontrol(scope_fig,'Style','edit','FontSize',8,'String','Inf','Position',[200 scsz(4)-220 70 22]);
     uicontrol(scope_fig,'Style','text','FontSize',8,'String','samples','Position',[270 scsz(4)-220 100 20])
