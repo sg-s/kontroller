@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_105_';
+VersionName= 'Kontroller v_107_(DEVELOPER)';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -161,6 +161,8 @@ f1 = []; f2=[]; f3 = []; f4 = [];
 fcs=[];
 mef = []; % figure for metadata editor
 ViewParadigmFig = [];
+fMC  = []; % figure handles for manual control UI
+fMCD = [];
 
 % uicontrol handles
 li = []; ri = []; lir = []; rir= [ ]; % analogue input handles
@@ -175,6 +177,7 @@ ParadigmNameUI = [];
 MCoi = []; 
 MCNumoi = []; % this is for manually entering a specific set point via a edit field
 plot_only_control = [];
+MCDhandle = [];
 
 % internal control variables
 MCOutputData = [];
@@ -617,8 +620,8 @@ end
     end
 
 %% manual control callback
-function [] =ManualControlCallback(eo,ed)
-        % make UI
+function [] =ManualControlCallback(~,~)
+        % make UI for analogue outputss
         n = nOutputChannels;
         Height = 300;
         fMC = figure('Position',[60 50 650 Height],'Toolbar','none','Menubar','none','Name','Manual Control','NumberTitle','off','CloseRequestFcn',@QuitManualControlCallback);
@@ -652,6 +655,28 @@ function [] =ManualControlCallback(eo,ed)
             % odd number of channels
             error('Odd number of channels. Cant handle this')
         end
+        
+        
+        % make UI for digital outputss
+        
+        n = length(UsedDigitalOutputChannels);
+
+        base_height = 70;
+        Height = n*(base_height+1);
+        fMCD = figure('Position',[60 450 350 Height],'Toolbar','none','Menubar','none','Name','Manual Control: Digital Outputs','NumberTitle','off','CloseRequestFcn',@QuitManualControlCallback);
+        a = axes; hold on
+        set(a,'Visible','off');
+            
+        
+        for k = 1:n
+            MCDhandle(k)=uicontrol(fMCD,'Position',[20 Height-k*base_height+10 100 20],'String',DigitalOutputChannelNames(UsedDigitalOutputChannels(k)),'Style','togglebutton','Callback',@ManualControlSliderCallback);
+        end
+        clear k
+        
+        
+       
+        
+        
         if isempty(PlotInputsList)
         else
             if scopes_running
@@ -668,6 +693,8 @@ function [] =ManualControlCallback(eo,ed)
                 s = daq.createSession('ni');
                 s.IsContinuous = true;
                 s.NotifyWhenDataAvailableExceeds = w/10; % 10Hz
+               
+                
                 % update scope_plot_data
                 scope_plot_data = NaN(length(get(PlotInputs,'Value')),5*w); % 5 s of  data in each channel
                 time = (1/w):(1/w):5;
@@ -676,24 +703,35 @@ function [] =ManualControlCallback(eo,ed)
                 ScopeThese = get(PlotInputs,'Value');
                 for k = 1:length(get(PlotInputs,'Value'))
                     ScopeHandles(k) = subplot(2,rows,k);
-                    set(ScopeHandles(k),'XLim',[0 5000],'YLim',[0 5]), hold off
+                    set(ScopeHandles(k),'XLim',[0 5*w],'YLim',[0 5]), hold off
                     ylabel( strcat(InputChannels{UsedInputChannels(k)},' -- ',InputChannelNames{UsedInputChannels(k)}))
                     s.addAnalogInputChannel('Dev1',InputChannels{UsedInputChannels(ScopeThese(k))}, 'Voltage'); % add channel
                 end
                 clear k
                 
-                MCOutputData = zeros(length(time),length(UsedOutputChannels)); 
+                MCOutputData = zeros(length(time),length(UsedOutputChannels)+length(UsedDigitalOutputChannels)); 
+                
+                % add analogue channels
                 TheseChannels=OutputChannels(UsedOutputChannels);
                 for k = 1:length(TheseChannels)
                     s.addAnalogOutputChannel('Dev1',OutputChannels{UsedOutputChannels(k)}, 'Voltage');
                 end
                 clear k
+                
+                % add digital channels
+                TheseChannels=DigitalOutputChannels(UsedDigitalOutputChannels);
+                for k = 1:length(TheseChannels)
+                     s.addDigitalChannel('Dev1',DigitalOutputChannels{UsedDigitalOutputChannels(k)}, 'OutputOnly');
+                end
+                clear k
+                
+                % queue data
                 s.queueOutputData(MCOutputData);
                 
                 
                 s.Rate = w; 
                 lh = s.addlistener('DataAvailable',@ScopePlotCallback);
-                lhMC = s.addlistener('DataRequired',@(src,event) src.queueOutputData(MCOutputData));
+                lhMC = s.addlistener('DataRequired',@PollManualControl);
                 
                 % specify each channel's range
 %                 for i = 1:length(s.Channels)
@@ -715,44 +753,7 @@ function [] =ManualControlCallback(eo,ed)
        
         end
 
-%         
 
-%         
-%         % configure session
-%         figure(scope_fig)   
-%         s = daq.createSession('ni');
-%         s.IsContinuous = true;
-%         s.Rate = w; 
-%         
-%         % configure session inputs
-%         s.NotifyWhenDataAvailableExceeds = 100; % 10Hz 
-%         % update scope_plot_data
-%         scope_plot_data = NaN(length(get(PlotInputs,'Value')),5000); % 5 s of  data in each channel
-%         ScopeHandles = []; % axis handles for each sub plot in scope
-%         rows = ceil(length(get(PlotInputs,'Value'))/2);
-%         ScopeThese = get(PlotInputs,'Value');
-%         for i = 1:length(get(PlotInputs,'Value'))
-%             ScopeHandles(i) = subplot(2,rows,i);
-%             plotname=strcat(InputChannels{UsedInputChannels(i)},'-',InputChannelNames{UsedInputChannels(i)});
-%             ylabel(plotname)
-%             set(ScopeHandles(i),'XLim',[0 5000]), hold on
-%             s.addAnalogInputChannel('Dev1',InputChannels{UsedInputChannels(ScopeThese(i))}, 'Voltage'); % add channel
-%         end
-%         clear i
-%         lh = s.addlistener('DataAvailable',@PlotCallback);
-%         
-%         
-%         % configure session outputs
-%         MCOutputData = zeros(length(UsedOutputChannels),500)'; 
-%        
-%         %s.NotifyWhenScansQueuedBelow = 100; % this line causes random
-%         %stops; don't know why
-%         lhMC = s.addlistener('DataRequired',@(src,event) src.queueOutputData(MCOutputData));
-%         
-%         % start it
-%         s.ExternalTriggerTimeout = 100;
-%         s.startBackground();
-%         scopes_running= 1;
         
         
 
@@ -760,39 +761,61 @@ function [] =ManualControlCallback(eo,ed)
     
 end
 
-%% manual control slider and text entry callback
-% bug here -- slider doesnt work becauyse its overwritten by the text edit
-    function ManualControlSliderCallback(src,~)
-         k=find(MCoi == src);
-         
-         if isempty(k)
-             k = find(MCNumoi == src);
-             
-             if isempty(k)
-                 error('What is being changed here? Something seriously wrong in Manual Control Callbacks.')
-             else
-                 % the text edit feild is being manipulated
-                 thisvalue = str2double(get(MCNumoi(k),'String'));
-                 MCOutputData(:,k) = thisvalue;
-                 
-                 % now move the slider to reflect the this
-                 set(MCoi(k),'Value',thisvalue);
-             end
-         else
-             % the slider is being changed
-              thisvalue = get(MCoi(k),'Value');
-              MCOutputData(:,k) = thisvalue;
-              
-              % now update the text edit value to reflect this
-              set(MCNumoi(k),'String',oval(thisvalue,2))
-         end
-         
-        
 
-        delete(lhMC)
-        lhMC = s.addlistener('DataRequired',@(src,event) src.queueOutputData(MCOutputData));
+
+%% Poll Manual Control
+% this is an experimental function that will be called every time data is
+% needed. it polls the UI for the manual control, constructs data on the
+% fly, and passes it back. 
+    function PollManualControl(src,~)
+        
+        % poll the digital outputs
+        for k = 1:length(MCDhandle)
+            a = MCDhandle(k);
+            MCOutputData(:,length(UsedOutputChannels)+k) = get(a,'Value');
+        end
+        clear k
+        
+        % poll the analogue outputs
+        for k = 1:length(MCoi)
+            a = MCoi(k);
+            MCOutputData(:,k) = get(a,'Value');
+        end
+        clear k
         
         
+        % queue
+        src.queueOutputData(MCOutputData);
+    end
+
+%% sychonirses manual control slider and text edit fields
+    function ManualControlSliderCallback(src,~)
+        
+        if any(MCDhandle==src)
+            % digital outputs being manipulated 
+            k = find(MCDhandle == src);
+            %MCOutputData(:,length(UsedOutputChannels)+k) = get(src,'Value');
+            
+        elseif any(MCNumoi == src)
+            % text edit analogue outputs being manipulated
+            k = find(MCNumoi == src);
+            thisvalue = str2double(get(MCNumoi(k),'String'));
+            %MCOutputData(:,k) = thisvalue;
+                 
+            % now move the slider to reflect the this
+            set(MCoi(k),'Value',thisvalue);
+        elseif any(MCoi == src)
+            % sliders being manipulated 
+            k = find(MCoi == src);
+            thisvalue = get(MCoi(k),'Value');
+            %MCOutputData(:,k) = thisvalue;
+              
+            % now update the text edit value to reflect this
+            set(MCNumoi(k),'String',oval(thisvalue,2))
+        else
+             error('What is being changed here? Something seriously wrong in Manual Control Callbacks.')
+        end
+    
         
     end
 
@@ -1550,9 +1573,11 @@ end
         trial_running = T*10;
         try
             s.startForeground();
-        catch
+        catch err
             % probably because the hardware is reserved.
             close all
+            disp('The error MATLAB reported was:')
+            disp(err.message);
             errordlg('Kontroller could not start the task. This is probably because the hardware is reserved. You need to restart Kontroller. Sorry about that. Type "return" and hit enter to restart.')
             clear all
             exit
@@ -1799,12 +1824,27 @@ end
         % stop session
         try
             s.stop;
+        catch
+        end
+        try
+            
             delete(lh)
+        catch
+        end
+        try
             delete(lhMC)
         catch
         end
         
-        delete(gcf)
+        try
+            delete(fMC)
+        catch
+        end
+        
+        try
+            delete(fMCD)
+        catch
+        end
         scopes_running=0;
         
         % relabel scopes button
