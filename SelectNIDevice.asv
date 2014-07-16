@@ -1,0 +1,13 @@
+function UseThisDevice = SelectNIDevice(d)
+
+% make descriptive labels
+S = {};
+for i = 1:length(d)
+    S{i} = strkat(d(i).ID,'   ',d(i).Model);
+end
+
+% create a UI
+[Selection,OK] = listdlg('Figure''ListString',S,'SelectionMode','single','Name','Choose DAQ','PromptString','Kontroller has detected mulitple DAQ devices. Choose which one you want to use.');
+
+
+keyboard
