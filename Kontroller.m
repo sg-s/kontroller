@@ -439,17 +439,17 @@ if ~gui
         % add the analogue input channels
         TheseChannels=InputChannels(UsedInputChannels);
         for ii = 1:length(TheseChannels)
-            s.addAnalogInputChannel('Dev1',InputChannels{UsedInputChannels(ii)}, 'Voltage');
+            s.addAnalogInputChannel(DeviceName,InputChannels{UsedInputChannels(ii)}, 'Voltage');
         end
         % add the analogue output channels
         TheseChannels=OutputChannels(UsedOutputChannels);
         for ii = 1:length(TheseChannels)
-             s.addAnalogOutputChannel('Dev1',OutputChannels{UsedOutputChannels(ii)}, 'Voltage');
+             s.addAnalogOutputChannel(DeviceName,OutputChannels{UsedOutputChannels(ii)}, 'Voltage');
         end
         % add the digital output channels
         TheseChannels=DigitalOutputChannels(UsedDigitalOutputChannels);
         for ii = 1:length(TheseChannels)
-             s.addDigitalChannel('Dev1',DigitalOutputChannels{UsedDigitalOutputChannels(ii)}, 'OutputOnly');
+             s.addDigitalChannel(DeviceName,DigitalOutputChannels{UsedDigitalOutputChannels(ii)}, 'OutputOnly');
         end
         
         % queue data        
@@ -473,12 +473,12 @@ if ~gui
 end
 
 %% launch Image Annotator
-    function [] = LaunchImageAnnotator(eo,ed)
+    function [] = LaunchImageAnnotator(~,~)
         data=ImageAnnotator(strcat('C:\data\',SaveToFile));
     end
 
 %% configure inputs
-    function [] =ConfigureInputChannels(eo,ed)
+    function [] =ConfigureInputChannels(~,~)
         % load saved configs      
         n = nInputChannels;
         Height = 600;
@@ -532,7 +532,7 @@ end
     end
 
 %% preview webcam
-    function [] = PreviewWebcam(eo,ed)
+    function [] = PreviewWebcam(~,~)
         % choose the maximum resolution
         ar=get(cam,'AvailableResolutions');
         set(cam,'Resolution',ar{end});
@@ -541,7 +541,7 @@ end
 
 
 %% take a picture with the webcam
-    function [pic, webcam_metadata] = TakePicture(eo,ed)
+    function [pic, webcam_metadata] = TakePicture(~,~)
         % choose the maximum resolution
         ar=get(cam,'AvailableResolutions');
         set(cam,'Resolution',ar{end});
@@ -555,7 +555,7 @@ end
     end
 
 %% configure outputs
-    function [] =ConfigureOutputChannels(eo,ed)
+    function [] =ConfigureOutputChannels(~,~)
         % make the analogue outputs
         n = nOutputChannels;
         Height = 300;
@@ -712,7 +712,7 @@ function [] =ManualControlCallback(~,~)
                     ScopeHandles(k) = subplot(2,rows,k);
                     set(ScopeHandles(k),'XLim',[0 5*w],'YLim',[0 5]), hold off
                     ylabel( strcat(InputChannels{UsedInputChannels(k)},' -- ',InputChannelNames{UsedInputChannels(k)}))
-                    s.addAnalogInputChannel('Dev1',InputChannels{UsedInputChannels(ScopeThese(k))}, 'Voltage'); % add channel
+                    s.addAnalogInputChannel(DeviceName,InputChannels{UsedInputChannels(ScopeThese(k))}, 'Voltage'); % add channel
                 end
                 clear k
                 
@@ -721,14 +721,14 @@ function [] =ManualControlCallback(~,~)
                 % add analogue channels
                 TheseChannels=OutputChannels(UsedOutputChannels);
                 for k = 1:length(TheseChannels)
-                    s.addAnalogOutputChannel('Dev1',OutputChannels{UsedOutputChannels(k)}, 'Voltage');
+                    s.addAnalogOutputChannel(DeviceName,OutputChannels{UsedOutputChannels(k)}, 'Voltage');
                 end
                 clear k
                 
                 % add digital channels
                 TheseChannels=DigitalOutputChannels(UsedDigitalOutputChannels);
                 for k = 1:length(TheseChannels)
-                     s.addDigitalChannel('Dev1',DigitalOutputChannels{UsedDigitalOutputChannels(k)}, 'OutputOnly');
+                     s.addDigitalChannel(DeviceName,DigitalOutputChannels{UsedDigitalOutputChannels(k)}, 'OutputOnly');
                 end
                 clear k
                 
@@ -827,7 +827,7 @@ end
     end
 
 %% input config callback
-    function [] = InputConfigCallback(eo,ed)
+    function [] = InputConfigCallback(~,~)
         UsedInputChannels = [];
         n = nInputChannels;
          % first scan left
@@ -881,7 +881,7 @@ end
     end
 
 %% output config callback
-function [] = OutputConfigCallback(eo,ed)
+function [] = OutputConfigCallback(~,~)
     % configure analogue outputs
         UsedOutputChannels = [];
         n = nOutputChannels;
@@ -962,7 +962,7 @@ end
 
 
 %% oscilloscope callback
-    function  [] = ScopeCallback(eo,ed)
+    function  [] = ScopeCallback(~,~)
         if isempty(PlotInputsList)
         else
             if scopes_running
@@ -989,7 +989,7 @@ end
                     ScopeHandles(i) = subplot(2,rows,i);
                     set(ScopeHandles(i),'XLim',[0 5000]), hold off
                     ylabel( strcat(InputChannels{UsedInputChannels(i)},' -- ',InputChannelNames{UsedInputChannels(i)}))
-                    s.addAnalogInputChannel('Dev1',InputChannels{UsedInputChannels(ScopeThese(i))}, 'Voltage'); % add channel
+                    s.addAnalogInputChannel(DeviceName,InputChannels{UsedInputChannels(ScopeThese(i))}, 'Voltage'); % add channel
                 end
                 clear i
                 
@@ -1010,6 +1010,8 @@ end
                 
                 % relabel scopes button
                 set(StartScopes,'String','Stop Scopes');
+                
+                
                 s.startBackground();
                 scopes_running = 1;
    
@@ -1533,21 +1535,21 @@ end
         % add the analogue input channels
         TheseChannels=InputChannels(UsedInputChannels);
         for i = 1:length(TheseChannels)
-            s.addAnalogInputChannel('Dev1',InputChannels{UsedInputChannels(i)}, 'Voltage');
+            s.addAnalogInputChannel(DeviceName,InputChannels{UsedInputChannels(i)}, 'Voltage');
         end
         clear i
 
         % add the analogue output channels
         TheseChannels=OutputChannels(UsedOutputChannels);
         for i = 1:length(TheseChannels)
-             s.addAnalogOutputChannel('Dev1',OutputChannels{UsedOutputChannels(i)}, 'Voltage');
+             s.addAnalogOutputChannel(DeviceName,OutputChannels{UsedOutputChannels(i)}, 'Voltage');
         end
         clear i
 
         % add the digital output channels
         TheseChannels=DigitalOutputChannels(UsedDigitalOutputChannels);
         for i = 1:length(TheseChannels)
-             s.addDigitalChannel('Dev1',DigitalOutputChannels{UsedDigitalOutputChannels(i)}, 'OutputOnly');
+             s.addDigitalChannel(DeviceName,DigitalOutputChannels{UsedDigitalOutputChannels(i)}, 'OutputOnly');
         end
         clear i
 
