@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_109_';
+VersionName= 'Kontroller v_110_';
 %% validate inputs
 gui = 0;
 RunTheseParadigms = [];
@@ -1295,11 +1295,17 @@ end
                    ,'\n',(tt),'seconds remain');
                 end
 
+                % start scopes
+                ScopeCallback;
+
 
                 % run inter-trial function
                 iti = (get(InterTrialIntervalControl,'String'));
                 set(Konsole,'String',ks)
                 eval(iti)
+
+                % stop scopes
+                ScopeCallback;
 
                 % check if pause is required
                 if get(PauseProgramButton,'Value') 
