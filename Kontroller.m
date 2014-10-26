@@ -66,9 +66,10 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_110_';
+VersionName= 'Kontroller v_111_';
 %% validate inputs
 gui = 0;
+demo_mode = 0;
 RunTheseParadigms = [];
 ControlParadigm = []; % stores the actual control signals for the different control paradigm
 w = 1000; % 1kHz sampling  
@@ -105,7 +106,8 @@ j = find(strcmp('Data Acquisition Toolbox', v), 1);
 if ~isempty(j)
 else
     % No DAQ toolbox
-    error('Kontroller needs the <a href="http://www.mathworks.com/products/daq/">DAQ toolbox</a> to run, which was not detected.')
+    warning('Kontroller needs the <a href="http://www.mathworks.com/products/daq/">DAQ toolbox</a> to run, which was not detected. Kontroller will now run in demo mode')
+    demo_mode = 1;
 end
 clear j
 
@@ -212,7 +214,12 @@ if gui
     waitbar(0.3,wh,'Talking to NI DAQ. This may take time...'); figure(wh)
 end
 metadata.DateTime = datestr(now);
-d = daq.getDevices;
+if ~demo_mode
+    d = daq.getDevices;
+else
+    d.ID = 'Demo DAQ';
+    d.Model = 'Kontroller Demo';
+end
 if length(d) > 1
     UseThisDevice = SelectNIDevice(d);
 end
@@ -308,15 +315,27 @@ if gui
 else
     disp('Scanning hardware...')
 end
-d = daq.getDevices(); % this line takes a long time when you rin it for the first time...
+if demo_mode 
+else
+    d = daq.getDevices(); % this line takes a long time when you run it for the first time...
+end
+
 if gui
     figure(wh)
 end
 
-try
-    OutputChannels =  d(UseThisDevice).Subsystems(2).ChannelNames;
-catch
-    error('Something went wrong when trying to talk to the NI device. This is probably because it is not plugged in properly.')
+if ~demo_mode
+    try
+        OutputChannels =  d(UseThisDevice).Subsystems(2).ChannelNames;
+    catch
+        error('Something went wrong when trying to talk to the NI device. This is probably because it is not plugged in properly.')
+    end
+else
+    OutputChannels = {'ao0','ao1'};
+    d.Subsystems(1).ChannelNames = {'ai0','ai1'};
+    d.Subsystems(2).ChannelNames = {'di0','di1'};
+    d.Subsystems(3).ChannelNames = {'do0','do1'};
+    d.Vendor.FullName = 'Kontroller Demo';
 end
 nOutputChannels = length(OutputChannels);
 InputChannels =  d(UseThisDevice).Subsystems(1).ChannelNames;
@@ -410,15 +429,21 @@ if gui
     if verLessThan('matlab','8.3')
         set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
     else
-        if isempty(webcamlist)
-        disp('No webcams detected.')
-        set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
-    
-    else
-        cam=webcam(1);
-        set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model,'\nWebcam detected: ',cam.Name))
-        set(WebcamMenu,'Enable','on')
-    end
+        try webcamlist;
+            if isempty(webcamlist)
+                disp('No webcams detected.')
+                set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
+            
+            else
+                cam=webcam(1);
+                set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model,'\nWebcam detected: ',cam.Name))
+                set(WebcamMenu,'Enable','on')
+            end
+        catch
+            disp('No webcams detected.')
+            set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
+        end
+        
     end
     
     close(wh)
