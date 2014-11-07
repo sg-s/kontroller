@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_111_';
+VersionName= 'Kontroller v_112_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -429,7 +429,7 @@ if gui
     if verLessThan('matlab','8.3')
         set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
     else
-        try webcamlist;
+        if exist('webcamlist')
             if isempty(webcamlist)
                 disp('No webcams detected.')
                 set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
@@ -439,7 +439,7 @@ if gui
                 set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model,'\nWebcam detected: ',cam.Name))
                 set(WebcamMenu,'Enable','on')
             end
-        catch
+        else
             disp('No webcams detected.')
             set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
         end
@@ -1083,7 +1083,9 @@ end
             % control for very long stimuli, which causes plot functions to
             % crash
             plot_length = str2double(get(plot_only_control,'String'));
+
             EpochPlot(ScopeHandles(ScopeThese),ScopeThese,time,scope_plot_data,Epochs,PlotHandles(ScopeThese),plot_length);
+
             trial_running = trial_running - 1;
         else
             if rand>0.9
@@ -1927,7 +1929,7 @@ end
 
 %% Compute Epochs
 
-    function [] = ComputeEpochs(eo,ed)
+    function [] = ComputeEpochs(~,~)
         ThisParadigm =  (get(ParadigmListDisplay,'Value'));
         TheseDigitalOutputs = [];
         TheseDigitalOutputs=ControlParadigm(ThisParadigm).Outputs(length(UsedOutputChannels)+1:length([UsedOutputChannels UsedDigitalOutputChannels]),:);
@@ -1936,7 +1938,11 @@ end
         for si = 1:sz(1)
             TheseDigitalOutputs(si,:) = TheseDigitalOutputs(si,:).*(2^si-1);
         end
-        Epochs = sum(TheseDigitalOutputs);
+        if isvector(TheseDigitalOutputs)
+            Epochs= TheseDigitalOutputs;
+        else
+            Epochs = sum(TheseDigitalOutputs);
+        end
         
         % compress epochs
         ue = unique(Epochs);
@@ -1945,6 +1951,10 @@ end
         end
         Epochs = Epochs-1e4;
         
+        % defensive porgramming
+        if ~isvector(Epochs)
+            error('Error 1956: Epochs is not a vector. Something wrong in ComputeEpochs')
+        end
         
     end
 
