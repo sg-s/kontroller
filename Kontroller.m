@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_112_';
+VersionName= 'Kontroller v_113_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -77,13 +77,13 @@ if nargin == 0
     % fine.
     gui = 1; % default to showing the GUI
 elseif iseven(nargin)
-    for i = 1:nargin
-        temp = varargin{i};
+    for ii = 1:nargin
+        temp = varargin{ii};
         if ischar(temp)
-            eval(strcat(temp,'=varargin{i+1};'));
+            eval(strcat(temp,'=varargin{ii+1};'));
         end
     end
-    clear i
+    clear ii
     
     
 else
@@ -114,12 +114,12 @@ clear j
 
 % check for internal dependencies
 dependencies = {'oval','strkat','PrettyFig','CheckForNewestVersionOnGitHub'};
-for i = 1:length(dependencies)
-    if exist(dependencies{i}) ~= 2
+for ii = 1:length(dependencies)
+    if exist(dependencies{ii}) ~= 2
         error('Kontroller is missing an external function that it needs to run. You can download it <a href="https://github.com/sg-s/srinivas.gs_mtools">here.</a>')
     end
 end
-clear i
+clear ii
 
 % check for new version of Kontroller
 if gui
@@ -257,11 +257,12 @@ if gui
 
     % paradigm panel
     ControlParadigmList = {}; % stores a list of different control paradigm names. e.g., control, test, odour1, etc.
-    ParadigmPanel = uipanel('Title','Control Paradigms','FontSize',12,'units','pixels','pos',[15 30 170 180]);
+    ParadigmPanel = uipanel('Title','Control Paradigms','FontSize',12,'units','pixels','pos',[15 30 170 200]);
     ParadigmListDisplay = uicontrol(ParadigmPanel,'Position',[3 3 155 105],'Style','listbox','Enable','on','String',ControlParadigmList,'FontSize',12,'Min',0,'Max',2,'Callback',@ControlParadigmListCallback);
     SaveControlParadigmsButton = uicontrol(ParadigmPanel,'Position',[3,120,45,30],'Style','pushbutton','String','Save','Callback',@SaveControlParadigms);
     ViewControlParadigmButton = uicontrol(ParadigmPanel,'Position',[52,120,45,30],'Style','pushbutton','String','View','Callback',@ViewControlParadigm);
     RemoveControlParadigmsButton = uicontrol(ParadigmPanel,'Position',[100,120,60,30],'Style','pushbutton','String','Remove','Callback',@RemoveControlParadigms);
+    ParadigmNameDisplay = uicontrol(ParadigmPanel,'Position',[3,150,150,25],'Style','text','String','No Controls configured');
 
     % check to see if sampling rate is stored. 
     if exist('Kontroller.SamplingRate.mat','file') == 2
@@ -290,8 +291,8 @@ if gui
     RandomizeControl = uicontrol(AutomatePanel,'Style','popupmenu','String',{'Randomise','Interleave','Block','Reverse Block','Custom'},'Value',2,'FontSize',8,'Position',[5 50 100 20],'Callback',@RandomiseControlCallback);
 
 
-    ManualControlButton = uicontrol(f1,'Position',[10 230 170 30],'Enable','on','Style','pushbutton','String','Manual Control','Callback',@ManualControlCallback);
-    MetadataButton = uicontrol(f1,'Position',[10 270 170 30],'Enable','on','Style','pushbutton','String','Add Metadata...','Callback',@MetadataCallback);
+    ManualControlButton = uicontrol(f1,'Position',[12 240 170 30],'Enable','on','Style','pushbutton','String','Manual Control','Callback',@ManualControlCallback);
+    MetadataButton = uicontrol(f1,'Position',[12 280 170 30],'Enable','on','Style','pushbutton','String','Add Metadata...','Callback',@MetadataCallback);
 
     waitbar(0.5,wh,'Generating global variables...'); figure(wh)
     StartScopes = uicontrol(f1,'Position',[260 465 150 50],'Style','pushbutton','Enable','off','String','Start Scopes','FontSize',12,'Callback',@ScopeCallback);
@@ -1067,7 +1068,7 @@ end
 
 
 %% plot live data to scopes and grab data
-    function [] = PlotCallback(src,event)
+    function [] = PlotCallback(~,event)
         sz = size(scope_plot_data);
         % capture all the data acquired...        
         a =  find(isnan(scope_plot_data(1,:)),1,'first');
@@ -1096,7 +1097,7 @@ end
     end
 
 %% configure control signals
-    function [] = ConfigureControlSignals(eo,ed)
+    function [] = ConfigureControlSignals(~,~)
         no = length(UsedOutputChannels) + length(UsedDigitalOutputChannels);
         Height = 100+no*100;
         % figure out the variables in the workspace that you can use. 
@@ -1159,7 +1160,7 @@ end
     end
 
 %% configure control callback
-    function [] = ConfigureControlCallback(eo,ed)
+    function [] = ConfigureControlCallback(~,~)
         no = length(UsedOutputChannels) + length(UsedDigitalOutputChannels);
         % assume everything is OK, and make a paradigm
         ControlParadigm(length(ControlParadigm)+1).Name= get(ParadigmNameUI,'String');
@@ -1189,7 +1190,7 @@ end
     end
 
 %% select destintion callback
-    function [] = SelectDestinationCallback(eo,ed)
+    function [] = SelectDestinationCallback(~,~)
         temp=strcat(datestr(now,'yyyy_mm_dd'),'_customname.mat');
         SaveToFile=uiputfile(strcat('C:\data\',temp));
         % activate the run buttons
@@ -1209,7 +1210,7 @@ end
     end
 
 %% save to file destination callback
-    function [] = SaveToFileTextEdit(eo,ed)
+    function [] = SaveToFileTextEdit(~,~)
         if isempty(get(FileNameDisplay,'String'))
             % no destination
             if length(get(ParadigmListDisplay,'Value')) == 1
@@ -1239,7 +1240,7 @@ end
     end
 
 %% RandimzeControl Callback -- for custom sequence
-    function [] = RandomiseControlCallback(eo,ed)
+    function [] = RandomiseControlCallback(~,~)
         % get sequence
         if  get(RandomizeControl,'Value') == 5
             CustomSequence = inputdlg('Enter sequence of paradigms in program:','Choose custom sequence');
@@ -1249,7 +1250,7 @@ end
     end
 
 %% run programmme
-    function [] = RunProgram(eo,ed)
+    function [] = RunProgram(~,~)
         % make sure pause programme button is enabled
         set(PauseProgramButton,'Enable','on');
         set(AbortProgramButton,'Enable','on');
@@ -1399,7 +1400,7 @@ end
     end
 
 %% pause program
-    function [] = PauseProgram(eo,ed)
+    function [] = PauseProgram(~,~)
         if pause_programme
             set(PauseProgramButton,'String','PAUSE');
             pause_programme = 0;
@@ -1412,7 +1413,7 @@ end
     end
 
 %% control paradigm list callback
-    function [] = ControlParadigmListCallback(eo,ed)
+    function [] = ControlParadigmListCallback(~,~)
         % how many paradigms selected?
         if length(get(ParadigmListDisplay,'Value')) > 1
             % more than one. so unset RUN
@@ -1435,7 +1436,7 @@ end
     end
 
 %% view control paradigm callback
-    function [] = ViewControlParadigm(eo,ed)
+    function [] = ViewControlParadigm(~,~)
         % try to close previous figure
         try 
             close(ViewParadigmFig)
@@ -1465,7 +1466,7 @@ end
     end
 
 %% run trial
-    function [] = RunTrial(eo,ed) 
+    function [] = RunTrial(~,~) 
         webcam_buffer = [];
 
         % disable all buttons
@@ -1657,7 +1658,7 @@ end
     end
 
 %% process data == this function is called when the trial finishes running
-    function [] = ProcessTrialData(eo,ed)
+    function [] = ProcessTrialData(~,~)
         % delete listeners
         delete(lh)
         
@@ -1746,14 +1747,14 @@ end
     end
 
 %% save control paradigms
-    function [] = SaveControlParadigms(eo,ed)
+    function [] = SaveControlParadigms(~,~)
         temp=strcat(datestr(now,'yyyy_mm_dd'),'_Kontroller_paradigm_.mat');
         ControlParadigmSaveToFile=uiputfile(temp);
         save(ControlParadigmSaveToFile,'ControlParadigm');
     end
 
 %% load saved control paradigms
-    function [] = LoadSavedParadigms(eo,ed)
+    function [] = LoadSavedParadigms(~,~)
         [FileName,PathName] = uigetfile('*_Kontroller_paradigm*');
         temp=load(strcat(PathName,FileName));
 
@@ -1788,10 +1789,13 @@ end
             set(RunTrialButton,'enable','on','String','RUN and SAVE','BackgroundColor',[0.1 0.9 0.1]);
         end
         delete(fcs)
+        
+        % show the name
+        set(ParadigmNameDisplay,'String',strrep(FileName,'_Kontroller_Paradigm.mat',''))
     end
 
 %% metadata callback
-    function [] = MetadataCallback(eo,ed)
+    function [] = MetadataCallback(~,~)
         % open the editor
         mef = figure('Position',[60 50 450 400],'Toolbar','none','Menubar','none','Name','Metadata Editor','NumberTitle','off','Resize','off');
         uicontrol(mef,'Style','Text','String','Add or modify metadata using standard MATLAB syntax, one variable at a time, below:','Position',[5 340 440 50],'HorizontalAlignment','left')
@@ -1801,7 +1805,7 @@ end
     end
 
 %% metadata editor callback
-    function [] = AddMetadata(eo,ed)        
+    function [] = AddMetadata(~,~)        
         % evaluate it
         eval(strcat('metadata.',get(MetadataTextControl,'String')));
         % rebuild display cell string
@@ -1816,7 +1820,7 @@ end
     end
 
 %% clean up when quitting Kontroller
-    function [] = QuitKontrollerCallback(eo,ed)
+    function [] = QuitKontrollerCallback(~,~)
        selection = questdlg('Are you sure you want to quit Kontroller?','Confirm quit.','Yes','No','Yes'); 
        switch selection, 
           case 'Yes',
@@ -1862,7 +1866,7 @@ end
     end
 
 %% clean up when quitting Manual Control
-    function [] = QuitManualControlCallback(eo,ed)
+    function [] = QuitManualControlCallback(~,~)
         % stop session
         try
             s.stop;
@@ -1895,7 +1899,7 @@ end
     end
 
 %% on closing output config wiindows
-    function  [] = QuitConfigOutputsCallback(eo,ed)
+    function  [] = QuitConfigOutputsCallback(~,~)
         % close both windows together
         try
             delete(f3);
@@ -1907,7 +1911,7 @@ end
 
 %% remove control paradigms
 
-    function [] = RemoveControlParadigms(eo,ed)
+    function [] = RemoveControlParadigms(~,~)
         if ~isempty(ControlParadigmList)
             removethese = get(ParadigmListDisplay,'Value');
             
