@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_113_';
+VersionName= 'Kontroller v_114_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -142,7 +142,7 @@ end
 % check if data directory exists
 if exist('c:\data\','dir') == 7
 else
-    if gui
+    if gui && ~demo_mode
         disp('Kontroller will default to storing recorded data in c:\data. This directory will now be created...')
     end
     mkdir('c:\data\')
@@ -431,15 +431,22 @@ if gui
         set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
     else
         if exist('webcamlist')
-            if isempty(webcamlist)
+            try 
+                webcamlist 
+                if isempty(webcamlist)
+                    disp('No webcams detected.')
+                    set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
+                
+                else
+                    cam=webcam(1);
+                    set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model,'\nWebcam detected: ',cam.Name))
+                    set(WebcamMenu,'Enable','on')
+                end
+            catch
                 disp('No webcams detected.')
                 set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
-            
-            else
-                cam=webcam(1);
-                set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model,'\nWebcam detected: ',cam.Name))
-                set(WebcamMenu,'Enable','on')
             end
+            
         else
             disp('No webcams detected.')
             set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
