@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_115_';
+VersionName= 'Kontroller v_117_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -124,10 +124,10 @@ clear ii
 % check for new version of Kontroller
 if gui
     wh = waitbar(0.1,'Kontroller is starting...');
-    try
+    if online
         waitbar(0.2,wh,'Checking for updates...'); figure(wh)
         CheckForNewestVersionOnGitHub('kontroller',mfilename,VersionName);
-    catch
+    else
         disp('Could not check for updates.')
     end
     
