@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_114_';
+VersionName= 'Kontroller v_115_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -144,8 +144,9 @@ if exist('c:\data\','dir') == 7
 else
     if gui && ~demo_mode
         disp('Kontroller will default to storing recorded data in c:\data. This directory will now be created...')
+        mkdir('c:\data\')
     end
-    mkdir('c:\data\')
+    
 end
 
 %% persistent internal variables
@@ -180,6 +181,12 @@ MCoi = [];
 MCNumoi = []; % this is for manually entering a specific set point via a edit field
 plot_only_control = [];
 MCDhandle = [];
+
+% used by Kontroller in demo mode
+ParadigmHandles= [];
+TrialHandles = [];
+ThisParadigm = [];
+SamplingRate = [];
 
 % internal control variables
 MCOutputData = [];
@@ -276,7 +283,11 @@ if gui
     RunTrialButton = uicontrol(f1,'Position',[320 5 110 50],'Enable','off','BackgroundColor',[0.8 0.9 0.8],'Style','pushbutton','String','RUN w/o saving','FontWeight','bold','Callback',@RunTrial);
 
     FileNameDisplay = uicontrol(f1,'Position',[200,60,230,50],'Style','edit','String','No destination file selected','Callback',@SaveToFileTextEdit);
-    FileNameSelect = uicontrol(f1,'Position',[200,5,100,50],'Style','pushbutton','String','Write to...','Callback',@SelectDestinationCallback);
+    if ~demo_mode
+        FileNameSelect = uicontrol(f1,'Position',[200,5,100,50],'Style','pushbutton','String','Write to...','Callback',@SelectDestinationCallback);
+    else
+        FileNameSelect = uicontrol(f1,'Position',[200,5,100,50],'Style','pushbutton','String','Load data...','Callback',@LoadKontrollerData);
+    end
 
     AutomatePanel = uipanel('Title','Automate','FontSize',12,'units','pixels','pos',[205 120 230 200]);
     uicontrol(AutomatePanel,'Style','text','FontSize',8,'String','Repeat selected paradigms','Position',[1 120 100 50])
@@ -329,10 +340,10 @@ if ~demo_mode
     try
         OutputChannels =  d(UseThisDevice).Subsystems(2).ChannelNames;
     catch
-        error('Something went wrong when trying to talk to the NI device. This is probably because it is not plugged in properly.')
+        error('Something went wrong when trying to talk to the NI device. This is probably because it is not plugged in properly. Try restarting the DAQ, and restart Kontroller.')
     end
 else
-    OutputChannels = {'ao0','ao1'};
+    OutputChannels = {'ao0','ao1','ao2','ao3'};
     d.Subsystems(1).ChannelNames = {'ai0','ai1'};
     d.Subsystems(2).ChannelNames = {'di0','di1'};
     d.Subsystems(3).ChannelNames = {'do0','do1'};
@@ -504,6 +515,105 @@ if ~gui
         
     end
 end
+
+%% load saved data
+    function [] = LoadKontrollerData(~,~)
+        [FileName,PathName] = uigetfile('.mat');
+        if ~FileName
+            return
+        end
+        load_waitbar = waitbar(0.2, 'Loading data...');
+        temp=load(strcat(PathName,FileName));
+        ControlParadigm = temp.ControlParadigm;
+        data = temp.data;
+        SamplingRate = temp.SamplingRate;
+        OutputChannelNames = temp.OutputChannelNames;
+        metadata = temp.metadata;
+        timestamps = temp.timestamps;
+        clear temp
+
+        waitbar(0.4, load_waitbar,'Setting i/o channels...');
+        % update input and output channels
+        set(PlotInputs,'String',fieldnames(data))
+        PlotInputsList = fieldnames(data);
+
+        set(PlotOutputs,'String',OutputChannelNames)
+        PlotOutputsList = OutputChannelNames;
+
+        % enable paradigm and trial menus
+        set(ParadigmMenu,'Enable','on')
+        set(TrialMenu,'Enable','on')
+
+        CPNames = {ControlParadigm.Name};
+        ParadigmHandles = zeros(1,length(CPNames));
+        for i = 1:length(CPNames)
+            ParadigmHandles(i) = uimenu(ParadigmMenu,'Label',CPNames{i},'Callback',@SetParadigm);
+        end
+        close(load_waitbar)
+
+
+    end
+
+
+    function [] = SetParadigm(SelectedParadigm,~)
+        % figure out how many images are in this paradigm
+        ThisParadigm = find(ParadigmHandles == SelectedParadigm);
+        
+        % programtically generate a menu with trials in this paradigm
+        temp = Kontroller_ntrials(data);
+        nTrials = temp(ThisParadigm);
+
+        TrialNames = {};
+        for i = 1:nTrials
+            TrialNames{i} = strkat('Trial ',mat2str(i));
+        end
+        
+        TrialHandles = zeros(1,length(TrialNames));
+        for i = 1:length(TrialNames)
+            TrialHandles(i) = uimenu(TrialMenu,'Label',TrialNames{i},'Callback',@ShowData);
+        end
+        
+    end
+
+    function [] = ShowData(SelectedTrial,~)
+        ThisTrial = find(TrialHandles == SelectedTrial);
+
+        nplots=length(get(PlotInputs,'Value')) + length(get(PlotOutputs,'Value'));
+        plot_these = [get(PlotOutputs,'Value')  get(PlotInputs,'Value')];
+        nrows = 2;
+        ncols = ceil(nplots/nrows);
+        c=1;
+        sph = [];
+        for i = 1:nrows
+            for j = 1:ncols
+                figure(scope_fig)
+                sph(c) = subplot(nrows,ncols,c); hold on
+                if c > length(get(PlotOutputs,'Value'))
+                    % plot inputs
+                    temp = get(PlotInputs,'String');
+                    temp = temp(plot_these(c));
+                    title(temp)
+                    temp = temp{1};
+                    eval(strcat('temp=data(ThisParadigm).',temp,'(ThisTrial,:);'));
+                    plot(temp)
+
+                    
+
+                else
+                    % plot outputs
+                    plot(ControlParadigm(ThisParadigm).Outputs(plot_these(c),:));
+                    title(OutputChannelNames(plot_these(c)))
+                end
+                c = c+1;
+                if c > nplots
+                    linkaxes(sph,'x');
+                    return
+                end
+            end
+        end
+    end
+
+
 
 %% launch Image Annotator
     function [] = LaunchImageAnnotator(~,~)
