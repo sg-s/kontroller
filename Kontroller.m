@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_117_';
+VersionName= 'Kontroller v_118_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -233,7 +233,11 @@ end
 DeviceName = d(UseThisDevice).ID;
 metadata.daqName = d(UseThisDevice).Model;
 metadata.KontrollerVersion = VersionName;
-metadata.ComputerName = getenv('COMPUTERNAME');
+if ispc
+    metadata.ComputerName = getenv('COMPUTERNAME');
+else
+    [~,metadata.ComputerName] = system('hostname');
+end
 metadata.SessionName = RandomString(10);
 fn = fieldnames(metadata);
 for i = 1:length(fn)
@@ -306,7 +310,12 @@ if gui
     MetadataButton = uicontrol(f1,'Position',[12 280 170 30],'Enable','on','Style','pushbutton','String','Add Metadata...','Callback',@MetadataCallback);
 
     waitbar(0.5,wh,'Generating global variables...'); figure(wh)
-    StartScopes = uicontrol(f1,'Position',[260 465 150 50],'Style','pushbutton','Enable','off','String','Start Scopes','FontSize',12,'Callback',@ScopeCallback);
+    if demo_mode
+        StartScopes = uicontrol(f1,'Position',[260 465 150 50],'Style','pushbutton','Enable','off','String','Clear Scopes','FontSize',12,'Callback',@ClearScopes);
+    else
+        StartScopes = uicontrol(f1,'Position',[260 465 150 50],'Style','pushbutton','Enable','off','String','Start Scopes','FontSize',12,'Callback',@ScopeCallback);
+    end
+    
     scsz = get(0,'ScreenSize');
     scope_fig = figure('Position',[500 100 scsz(3)-500 scsz(4)-200],'Toolbar','none','Name','Oscilloscope','NumberTitle','off','Resize','on','Visible','off','CloseRequestFcn',@QuitKontrollerCallback); hold on; 
     
@@ -344,9 +353,9 @@ if ~demo_mode
     end
 else
     OutputChannels = {'ao0','ao1','ao2','ao3'};
-    d.Subsystems(1).ChannelNames = {'ai0','ai1'};
+    d.Subsystems(1).ChannelNames = {'ai0','ai1','ai2','ai3','ai4','ai5','ai6','ai7','ai8','ai9','ai10','ai11'};
     d.Subsystems(2).ChannelNames = {'di0','di1'};
-    d.Subsystems(3).ChannelNames = {'do0','do1'};
+    d.Subsystems(3).ChannelNames = {'do0','do1','do2','do3','do4','do5','do6','do7'};
     d.Vendor.FullName = 'Kontroller Demo';
 end
 nOutputChannels = length(OutputChannels);
@@ -516,6 +525,26 @@ if ~gui
     end
 end
 
+
+%% clear scopes
+    function [] = ClearScopes(~,~)
+        % find handles of all subplots in the scope figure
+        temp=get(scope_fig,'Children');
+        temp2 = [];
+        for i = 1:length(temp)
+            if isempty(strfind(class(temp(i)),'Axes'))
+                temp2 = [temp2 i];
+            end
+        end
+        temp(temp2) = [];
+
+        % delete them
+        for i = 1:length(temp)
+            delete(temp(i))
+        end
+    end
+
+
 %% load saved data
     function [] = LoadKontrollerData(~,~)
         [FileName,PathName] = uigetfile('.mat');
@@ -528,8 +557,11 @@ end
         data = temp.data;
         SamplingRate = temp.SamplingRate;
         OutputChannelNames = temp.OutputChannelNames;
-        metadata = temp.metadata;
-        timestamps = temp.timestamps;
+        try
+            metadata = temp.metadata;
+            timestamps = temp.timestamps;
+        catch
+        end
         clear temp
 
         waitbar(0.4, load_waitbar,'Setting i/o channels...');
@@ -559,7 +591,7 @@ end
         % figure out how many images are in this paradigm
         ThisParadigm = find(ParadigmHandles == SelectedParadigm);
         
-        % programtically generate a menu with trials in this paradigm
+        % programmatically generate a menu with trials in this paradigm
         temp = Kontroller_ntrials(data);
         nTrials = temp(ThisParadigm);
 
@@ -568,6 +600,13 @@ end
             TrialNames{i} = strkat('Trial ',mat2str(i));
         end
         
+        % clear the trial menu
+        if length(get(TrialMenu,'Children'))
+            temp =  get(TrialMenu,'Children');
+            for i = 1:length(temp)
+                delete(temp(i));
+            end
+        end
         TrialHandles = zeros(1,length(TrialNames));
         for i = 1:length(TrialNames)
             TrialHandles(i) = uimenu(TrialMenu,'Label',TrialNames{i},'Callback',@ShowData);
@@ -601,12 +640,13 @@ end
 
                 else
                     % plot outputs
-                    plot(ControlParadigm(ThisParadigm).Outputs(plot_these(c),:));
+                    plot(ControlParadigm(ThisParadigm).Outputs(plot_these(c),:),'k');
                     title(OutputChannelNames(plot_these(c)))
                 end
                 c = c+1;
                 if c > nplots
                     linkaxes(sph,'x');
+                    PrettyFig;
                     return
                 end
             end
@@ -669,7 +709,7 @@ end
             clear i
             
         else
-            error('Odd number of channels, cannot handle this')
+            error('Kontroller error 676: Odd number of channels, cannot handle this')
         end
     
     end
