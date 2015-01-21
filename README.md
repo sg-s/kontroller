@@ -13,7 +13,7 @@ Kontroller is a free wrapper for MATLAB's DAQ toolbox that makes it very easy to
 The recommended way to install `kontroller` is to use my package manager:
 
 ```matlab
->> urlwrite('https://raw.githubusercontent.com/sg-s/srinivas.gs_mtools/master/install.m','install.m'); 
+>> urlwrite('http://git.io/47a1Pg','install.m'); 
 >> install kontroller
 >> install srinivas.gs_mtools
 ```
