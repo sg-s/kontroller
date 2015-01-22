@@ -66,7 +66,8 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_118_';
+VersionName= 'Kontroller v_119_';
+VersionName = strrep(VersionName,'_','');
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -123,9 +124,12 @@ clear ii
 
 % check for new version of Kontroller
 if gui
-    wh = waitbar(0.1,'Kontroller is starting...');
+    wh = SplashScreen( 'Splashscreen', 'images/title.png','ProgressBar', 'on','ProgressPosition', 5, 'ProgressRatio', 0.1 );
+    wh.addText( 30, 50, 'Kontroller is starting...', 'FontSize', 20, 'Color', 'k' );
+    % wh = waitbar(0.1,'Kontroller is starting...');
     if online
-        waitbar(0.2,wh,'Checking for updates...'); figure(wh)
+        wh.ProgressRatio  =0.2;
+        % waitbar(0.2,wh,'Checking for updates...'); figure(wh)
         CheckForNewestVersionOnGitHub('kontroller',mfilename,VersionName);
     else
         disp('Could not check for updates.')
@@ -218,7 +222,8 @@ webcam_buffer = []; % this is a structure used to properly pack images into data
 
 %% initlaise some metadata
 if gui
-    waitbar(0.3,wh,'Talking to NI DAQ. This may take time...'); figure(wh)
+    wh.ProgressRatio  =0.3;
+    % waitbar(0.3,wh,'Talking to NI DAQ. This may take time...'); figure(wh)
 end
 metadata.DateTime = datestr(now);
 if ~demo_mode
@@ -253,8 +258,9 @@ if gui
     f1 = figure('Position',[20 60 450 700],'Toolbar','none','Menubar','none','Name',VersionName,'NumberTitle','off','Resize','off','HandleVisibility','on','CloseRequestFcn',@QuitKontrollerCallback);
     WebcamMenu = uimenu(f1,'Label','Webcam','Enable','off');
     PreviewWebcamItem = uimenu(WebcamMenu,'Label','Preview','Callback',@PreviewWebcam);
+    wh.ProgressRatio  =0.4;
     AnnotateWebcamItem = uimenu(WebcamMenu,'Label','Annotate...','Callback',@LaunchImageAnnotator);
-    waitbar(0.4,wh,'Generating UI...'); figure(wh)
+    % waitbar(0.4,wh,'Generating UI...'); figure(wh)
     Konsole = uicontrol('Position',[15 600 425 90],'Style','text','String','Kontroller is starting...','FontName','Courier','HorizontalAlignment','left');
     ConfigureInputChannelButton = uicontrol('Position',[15 540 140 50],'Style','pushbutton','Enable','off','String','Configure Inputs','FontSize',10,'Callback',@ConfigureInputChannels);
     ConfigureOutputChannelButton = uicontrol('Position',[160 540 140 50],'Style','pushbutton','Enable','off','String','Configure Outputs','FontSize',10,'Callback',@ConfigureOutputChannels);
@@ -309,7 +315,8 @@ if gui
     ManualControlButton = uicontrol(f1,'Position',[12 240 170 30],'Enable','on','Style','pushbutton','String','Manual Control','Callback',@ManualControlCallback);
     MetadataButton = uicontrol(f1,'Position',[12 280 170 30],'Enable','on','Style','pushbutton','String','Add Metadata...','Callback',@MetadataCallback);
 
-    waitbar(0.5,wh,'Generating global variables...'); figure(wh)
+    wh.ProgressRatio  =0.5;
+    % waitbar(0.5,wh,'Generating global variables...'); figure(wh)
     if demo_mode
         StartScopes = uicontrol(f1,'Position',[260 465 150 50],'Style','pushbutton','Enable','off','String','Clear Scopes','FontSize',12,'Callback',@ClearScopes);
     else
@@ -332,7 +339,8 @@ end
 %% figure out DAQ characteristics and initialise
 
 if gui
-    waitbar(0.6,wh,'Scanning hardware...'); figure(wh)
+    wh.ProgressRatio  =0.6;
+    % waitbar(0.6,wh,'Scanning hardware...'); figure(wh)
 else
     disp('Scanning hardware...')
 end
@@ -341,9 +349,9 @@ else
     d = daq.getDevices(); % this line takes a long time when you run it for the first time...
 end
 
-if gui
-    figure(wh)
-end
+% if gui
+%     figure(wh)
+% end
 
 if ~demo_mode
     try
@@ -372,7 +380,8 @@ UsedOutputChannels = [];
 OutputChannelNames = {}; % this is the user defined names
 
 if gui
-    waitbar(0.7,wh,'Checking for input config...'); figure(wh)
+    wh.ProgressRatio  =0.7;
+    % waitbar(0.7,wh,'Checking for input config...'); figure(wh)
 end
 % load saved configs...inputs
 if ~isempty(dir('Kontroller.Config.Input.mat'))
@@ -405,7 +414,8 @@ if ~isempty(dir('Kontroller.Config.SamplingRate.mat'))
 end
 
 if gui
-    waitbar(0.8,wh,'Checking for output config...'); figure(wh)
+    wh.ProgressRatio  =0.8;
+    % waitbar(0.8,wh,'Checking for output config...'); figure(wh)
 end
 % load saved configs..outputs
 if gui
@@ -443,7 +453,8 @@ if ~isempty(dir('Kontroller.Config.Output.Digital.mat'))
     
 end
 if gui
-    waitbar(0.9,wh,'Looking for webcams...'); figure(wh)
+    wh.ProgressRatio  =0.9;
+    % waitbar(0.9,wh,'Looking for webcams...'); figure(wh)
 
     set(ConfigureInputChannelButton,'Enable','on')
     set(ConfigureOutputChannelButton,'Enable','on')
@@ -474,7 +485,8 @@ if gui
         
     end
     
-    close(wh)
+    delete(wh);
+    %close(wh)
     set(scope_fig,'Visible','on')
 end
 
