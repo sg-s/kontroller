@@ -124,7 +124,11 @@ clear ii
 
 % check for new version of Kontroller
 if gui
-    wh = SplashScreen( 'Splashscreen', 'images/title.png','ProgressBar', 'on','ProgressPosition', 5, 'ProgressRatio', 0.1 );
+    if ispc
+        wh = SplashScreen( 'Splashscreen', 'images\title.png','ProgressBar', 'on','ProgressPosition', 5, 'ProgressRatio', 0.1 );
+    else
+        wh = SplashScreen( 'Splashscreen', 'images/title.png','ProgressBar', 'on','ProgressPosition', 5, 'ProgressRatio', 0.1 );
+    end
     wh.addText( 30, 50, 'Kontroller is starting...', 'FontSize', 20, 'Color', 'k' );
     % wh = waitbar(0.1,'Kontroller is starting...');
     if online
