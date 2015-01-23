@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_120_';
+VersionName= 'Kontroller v_122_';
 VersionName = strrep(VersionName,'_','');
 %% validate inputs
 gui = 0;
@@ -124,17 +124,15 @@ clear ii
 
 % check for new version of Kontroller
 if gui
-    if ispc
-        wh = SplashScreen( 'Splashscreen', 'title.png','ProgressBar', 'on','ProgressPosition', 5, 'ProgressRatio', 0.1 );
-    else
-        wh = SplashScreen( 'Splashscreen', 'title.png','ProgressBar', 'on','ProgressPosition', 5, 'ProgressRatio', 0.1 );
-    end
+    wh = SplashScreen( 'Splashscreen', 'title.png','ProgressBar', 'on','ProgressPosition', 5, 'ProgressRatio', 0.1 );
     wh.addText( 30, 50, 'Kontroller is starting...', 'FontSize', 20, 'Color', 'k' );
     % wh = waitbar(0.1,'Kontroller is starting...');
     if online
         wh.ProgressRatio  =0.2;
         % waitbar(0.2,wh,'Checking for updates...'); figure(wh)
-        CheckForNewestVersionOnGitHub('kontroller',mfilename,VersionName);
+        if CheckForNewestVersionOnGitHub('kontroller',mfilename,VersionName);
+            disp('You can update kontroller using "install -f kontroller"')
+        end
     else
         disp('Could not check for updates.')
     end
