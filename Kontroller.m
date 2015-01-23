@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_119_';
+VersionName= 'Kontroller v_120_';
 VersionName = strrep(VersionName,'_','');
 %% validate inputs
 gui = 0;
@@ -125,9 +125,9 @@ clear ii
 % check for new version of Kontroller
 if gui
     if ispc
-        wh = SplashScreen( 'Splashscreen', 'images\title.png','ProgressBar', 'on','ProgressPosition', 5, 'ProgressRatio', 0.1 );
+        wh = SplashScreen( 'Splashscreen', 'title.png','ProgressBar', 'on','ProgressPosition', 5, 'ProgressRatio', 0.1 );
     else
-        wh = SplashScreen( 'Splashscreen', 'images/title.png','ProgressBar', 'on','ProgressPosition', 5, 'ProgressRatio', 0.1 );
+        wh = SplashScreen( 'Splashscreen', 'title.png','ProgressBar', 'on','ProgressPosition', 5, 'ProgressRatio', 0.1 );
     end
     wh.addText( 30, 50, 'Kontroller is starting...', 'FontSize', 20, 'Color', 'k' );
     % wh = waitbar(0.1,'Kontroller is starting...');
