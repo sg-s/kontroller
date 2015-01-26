@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_123_';
+VersionName= 'Kontroller v_124_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -235,6 +235,8 @@ else
 end
 if length(d) > 1
     UseThisDevice = SelectNIDevice(d);
+elseif length(d) == 0
+    error('You do not have any NI DAQ devices connected.')
 end
 DeviceName = d(UseThisDevice).ID;
 metadata.daqName = d(UseThisDevice).Model;
