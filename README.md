@@ -4,6 +4,8 @@
 
 [![GPL License](http://img.shields.io/badge/license-GPL-blue.svg?style=flat)](http://opensource.org/licenses/GPL-2.0)
 
+[![DOI](https://zenodo.org/badge/3740/sg-s/kontroller.svg)](http://dx.doi.org/10.5281/zenodo.14584)
+
 **a free wrapper for MATLAB DAQ to make experiments easier**
 
 Kontroller is a free wrapper for MATLAB's DAQ toolbox that makes it very easy to begin doing experiments. Spend less time writing code and more time doing real science. 
