@@ -2,7 +2,7 @@
 
 ![](images/title.png)
 
-[![GPL License](http://img.shields.io/badge/license-GPL-blue.svg?style=flat)](http://opensource.org/licenses/GPL-3.0)
+[![GPL License](http://img.shields.io/badge/license-GPL-blue.svg?style=flat)](http://opensource.org/licenses/GPL-2.0)
 
 **a free wrapper for MATLAB DAQ to make experiments easier**
 
