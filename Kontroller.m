@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_124_';
+VersionName= 'Kontroller v_125_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
