@@ -258,7 +258,7 @@ set(MetadataTextControl,'String','');
 %% make the GUI
 if gui
 
-    f1 = figure('Position',[20 60 450 700],'Toolbar','none','Menubar','none','Name',VersionName,'NumberTitle','off','Resize','off','HandleVisibility','on','CloseRequestFcn',@QuitKontrollerCallback);
+    f1 = figure('Position',[20 60 450 700],'Toolbar','none','Menubar','none','Name',strrep(VersionName,'_',''),'NumberTitle','off','Resize','off','HandleVisibility','on','CloseRequestFcn',@QuitKontrollerCallback);
     WebcamMenu = uimenu(f1,'Label','Webcam','Enable','off');
     PreviewWebcamItem = uimenu(WebcamMenu,'Label','Preview','Callback',@PreviewWebcam);
     wh.ProgressRatio  =0.4;
