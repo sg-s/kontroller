@@ -35,7 +35,7 @@ Record continuous analogue data while writing predefined vectors to analogue or 
 
 `kontroller` is fully programmable, and can be used as a command line tool for more complex tasks. 
 
-## Install
+## Installation
 
 The recommended way to install `kontroller` is to use my package manager:
 
@@ -48,7 +48,7 @@ if you have [git](http://www.git-scm.com/) installed, you can
 
 ```bash
 git clone https://github.com/sg-s/kontroller
-https://github.com/sg-s/srinivas.gs_mtools # kontroller needs this to work
+git clone https://github.com/sg-s/srinivas.gs_mtools # kontroller needs this to work
 ```
 and don't forget to add these folders to your `MATLAB path`
 

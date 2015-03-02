@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_125_';
+VersionName= 'Kontroller v_126_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -255,6 +255,15 @@ clear i
 set(MetadataTextDisplay,'String',metadatatext);
 set(MetadataTextControl,'String','');
 
+% check to see if sampling rate is stored. 
+if exist('Kontroller.SamplingRate.mat','file') == 2
+    load('Kontroller.SamplingRate.mat');
+else
+    % default
+    w = 1000;
+end
+
+
 %% make the GUI
 if gui
 
@@ -284,13 +293,7 @@ if gui
     RemoveControlParadigmsButton = uicontrol(ParadigmPanel,'Position',[100,120,60,30],'Style','pushbutton','String','Remove','Callback',@RemoveControlParadigms);
     ParadigmNameDisplay = uicontrol(ParadigmPanel,'Position',[3,150,150,25],'Style','text','String','No Controls configured');
 
-    % check to see if sampling rate is stored. 
-    if exist('Kontroller.SamplingRate.mat','file') == 2
-        load('Kontroller.SamplingRate.mat');
-    else
-        % default
-        w = 1000;
-    end
+
     SamplingRateControl = uicontrol(f1,'Position',[133 5 50 20],'Style','edit','String',mat2str(w),'Callback',@SamplingRateCallback);
     uicontrol(f1,'Position',[20 5 100 20],'Style','text','String','Sampling Rate');
     RunTrialButton = uicontrol(f1,'Position',[320 5 110 50],'Enable','off','BackgroundColor',[0.8 0.9 0.8],'Style','pushbutton','String','RUN w/o saving','FontWeight','bold','Callback',@RunTrial);
