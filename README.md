@@ -10,12 +10,23 @@ Kontroller is a free wrapper for MATLAB's DAQ toolbox that makes it very easy to
 
 ## Features
 
-![](images/main.png)
-
-
 ### Click-and-Type Setup
 
 Name a physical channel on your NI board to record from it or write to it. Delete the name to stop using it. It's that simple.
+
+![](images/configure-inputs.gif)
+
+### Configure control paradigms
+
+Choose vectors from your workspace to construct control paradigms to write data to devices. 
+
+![](images/configure-controls.gif)
+
+### Analogue/digital inputs, and analogue outputs. Simultaneously.
+
+Record continuous analogue data while writing predefined vectors to analogue or digital outputs at the same time. Control LEDs while measuring from light sensors. Turn stepper motors while measuring from a strain gauge. No matter what your task, it's the same config.
+
+![](images/acquire-data.gif)
 
 ### Oscilloscope
 
@@ -23,9 +34,7 @@ Don't want to record data but just see what your data stream looks like? A handy
 
 ![](images/control.png)
 
-### Analogue/digital inputs, and analogue outputs. Simultaneously.
 
-Record continuous analogue data while writing predefined vectors to analogue or digital outputs at the same time. Control LEDs while measuring from light sensors. Turn stepper motors while measuring from a strain gauge. No matter what your task, it's the same config.
 
 ### Automation 
 

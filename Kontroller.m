@@ -84,8 +84,6 @@ elseif iseven(nargin)
         end
     end
     clear ii
-    
-    
 else
     error('Inputs need to be name value pairs')
 end
