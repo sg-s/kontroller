@@ -16,11 +16,14 @@ Name a physical channel on your NI board to record from it or write to it. Delet
 
 ![](images/configure-inputs.gif)
 
+![](images/configure-outputs.gif)
+
 ### Configure control paradigms
 
 Choose vectors from your workspace to construct control paradigms to write data to devices. 
 
-![](images/configure-controls.gif)
+
+
 
 ### Analogue/digital inputs, and analogue outputs. Simultaneously.
 
