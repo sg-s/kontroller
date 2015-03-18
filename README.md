@@ -22,7 +22,7 @@ Name a physical channel on your NI board to record from it or write to it. Delet
 
 Choose vectors from your workspace to construct control paradigms to write data to devices. 
 
-
+![](images/configure-controls.gif)
 
 
 ### Analogue/digital inputs, and analogue outputs. Simultaneously.
@@ -34,9 +34,6 @@ Record continuous analogue data while writing predefined vectors to analogue or 
 ### Oscilloscope
 
 Don't want to record data but just see what your data stream looks like? A handy scope function looks at live data without recording anything.
-
-![](images/control.png)
-
 
 
 ### Automation 
@@ -63,4 +60,8 @@ git clone https://github.com/sg-s/kontroller
 git clone https://github.com/sg-s/srinivas.gs_mtools # kontroller needs this to work
 ```
 and don't forget to add these folders to your `MATLAB path`
+
+# License
+
+[GPL v2](http://choosealicense.com/licenses/gpl-2.0/#)
 
