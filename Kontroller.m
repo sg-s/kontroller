@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_126_';
+VersionName= 'Kontroller v_127_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -841,6 +841,11 @@ function [] =ManualControlCallback(~,~)
             for i = 1:n/2  % left side
                 if ismember(i,UsedOutputChannels)
                     MCoi(oi) = uicontrol(fMC,'Position',[90 Height-i*nspacing 100 20],'Style', 'slider','Min',0,'Max',5,'Value',0,'String',OutputChannelNames{i},'FontSize',16,'Callback',@ManualControlSliderCallback);
+                    try    % R2013b and older
+                       addlistener(MCoi(oi),'ActionEvent',@ManualControlSliderCallback);
+                    catch  % R2014a and newer
+                       addlistener(MCoi(oi),'ContinuousValueChange',@ManualControlSliderCallback);
+                    end
                     uicontrol(fMC,'Position',[220 Height-i*nspacing 50 20],'Style', 'text','String',OutputChannels{i},'FontSize',12);
                     MCNumoi(oi) = uicontrol(fMC,'Position',[20 Height-i*nspacing 60 20],'Style', 'edit','String','0','FontSize',12,'Callback',@ManualControlSliderCallback);
                     oi = oi +1; 
@@ -850,6 +855,11 @@ function [] =ManualControlCallback(~,~)
             for i = 1:n/2  % right side  
                 if ismember(i+n/2,UsedOutputChannels)
                     MCoi(oi) = uicontrol(fMC,'Position',[390 Height-i*nspacing 100 20],'Style', 'slider','Min',0,'Max',5,'Value',0,'String',OutputChannelNames{n/2+i},'FontSize',16,'Callback',@ManualControlSliderCallback);
+                    try    % R2013b and older
+                       addlistener(MCoi(oi),'ActionEvent',@ManualControlSliderCallback);
+                    catch  % R2014a and newer
+                       addlistener(MCoi(oi),'ContinuousValueChange',@ManualControlSliderCallback);
+                    end
                     uicontrol(fMC,'Position',[320 Height-i*nspacing 50 20],'Style', 'text','String',OutputChannels{(n/2+i)},'FontSize',12);
                     MCNumoi(oi) = uicontrol(fMC,'Position',[520 Height-i*nspacing 60 20],'Style', 'edit','String','0','FontSize',12,'Callback',@ManualControlSliderCallback);
                     oi = oi +1;
@@ -896,9 +906,11 @@ function [] =ManualControlCallback(~,~)
                 % start scopes
                 figure(scope_fig)   
                 % create session
+                clear s
                 s = daq.createSession('ni');
                 s.IsContinuous = true;
                 s.NotifyWhenDataAvailableExceeds = w/10; % 10Hz
+                
                
                 
                 % update scope_plot_data
@@ -915,7 +927,8 @@ function [] =ManualControlCallback(~,~)
                 end
                 clear k
                 
-                MCOutputData = zeros(length(time),length(UsedOutputChannels)+length(UsedDigitalOutputChannels)); 
+                % MCOutputData = zeros(length(time),length(UsedOutputChannels)+length(UsedDigitalOutputChannels)); 
+                MCOutputData = zeros(w/10,length(UsedOutputChannels)+length(UsedDigitalOutputChannels)); 
                 
                 % add analogue channels
                 TheseChannels=OutputChannels(UsedOutputChannels);
@@ -932,12 +945,14 @@ function [] =ManualControlCallback(~,~)
                 clear k
                 
                 % queue data
+                s.NotifyWhenScansQueuedBelow = w/10;
                 s.queueOutputData(MCOutputData);
                 
                 
                 s.Rate = w; 
                 lh = s.addlistener('DataAvailable',@ScopePlotCallback);
                 lhMC = s.addlistener('DataRequired',@PollManualControl);
+
                 
                 % specify each channel's range
 %                 for i = 1:length(s.Channels)
@@ -952,6 +967,9 @@ function [] =ManualControlCallback(~,~)
                 
                 % relabel scopes button
                 set(StartScopes,'String','Stop Scopes');
+                
+                
+                
                 s.startBackground();
                 scopes_running = 1;
    
@@ -974,7 +992,7 @@ end
 % needed. it polls the UI for the manual control, constructs data on the
 % fly, and passes it back. 
     function PollManualControl(src,~)
-        
+        % datestr(clock)
         % poll the digital outputs
         for k = 1:length(MCDhandle)
             a = MCDhandle(k);
@@ -992,6 +1010,7 @@ end
         
         % queue
         src.queueOutputData(MCOutputData);
+        
     end
 
 %% sychonirses manual control slider and text edit fields
@@ -1014,14 +1033,16 @@ end
             % sliders being manipulated 
             k = find(MCoi == src);
             thisvalue = get(MCoi(k),'Value');
-            %MCOutputData(:,k) = thisvalue;
+            MCOutputData(:,k) = thisvalue;
               
             % now update the text edit value to reflect this
             set(MCNumoi(k),'String',oval(thisvalue,2))
         else
              error('What is being changed here? Something seriously wrong in Manual Control Callbacks.')
         end
-    
+        
+        % fake a call to poll data
+         PollManualControl(s);
         
     end
 
