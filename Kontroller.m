@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_127_';
+VersionName= 'Kontroller v_128_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -895,6 +895,7 @@ function [] =ManualControlCallback(~,~)
         
         if isempty(PlotInputsList)
         else
+            
             if scopes_running
                 % stop scopes
                 s.stop;
@@ -902,78 +903,79 @@ function [] =ManualControlCallback(~,~)
                 % relabel scopes button
                 set(StartScopes,'String','Start Scopes');
                 scopes_running = 0;
-            else
-                % start scopes
-                figure(scope_fig)   
-                % create session
-                clear s
-                s = daq.createSession('ni');
-                s.IsContinuous = true;
-                s.NotifyWhenDataAvailableExceeds = w/10; % 10Hz
-                
-               
-                
-                % update scope_plot_data
-                scope_plot_data = NaN(length(get(PlotInputs,'Value')),5*w); % 5 s of  data in each channel
-                time = (1/w):(1/w):5;
-                ScopeHandles = []; % axis handles for each sub plot in scope
-                rows = ceil(length(get(PlotInputs,'Value'))/2);
-                ScopeThese = get(PlotInputs,'Value');
-                for k = 1:length(get(PlotInputs,'Value'))
-                    ScopeHandles(k) = subplot(2,rows,k);
-                    set(ScopeHandles(k),'XLim',[0 5*w],'YLim',[0 5]), hold off
-                    ylabel( strcat(InputChannels{UsedInputChannels(k)},' -- ',InputChannelNames{UsedInputChannels(k)}))
-                    s.addAnalogInputChannel(DeviceName,InputChannels{UsedInputChannels(ScopeThese(k))}, 'Voltage'); % add channel
-                end
-                clear k
-                
-                % MCOutputData = zeros(length(time),length(UsedOutputChannels)+length(UsedDigitalOutputChannels)); 
-                MCOutputData = zeros(w/10,length(UsedOutputChannels)+length(UsedDigitalOutputChannels)); 
-                
-                % add analogue channels
-                TheseChannels=OutputChannels(UsedOutputChannels);
-                for k = 1:length(TheseChannels)
-                    s.addAnalogOutputChannel(DeviceName,OutputChannels{UsedOutputChannels(k)}, 'Voltage');
-                end
-                clear k
-                
-                % add digital channels
-                TheseChannels=DigitalOutputChannels(UsedDigitalOutputChannels);
-                for k = 1:length(TheseChannels)
-                     s.addDigitalChannel(DeviceName,DigitalOutputChannels{UsedDigitalOutputChannels(k)}, 'OutputOnly');
-                end
-                clear k
-                
-                % queue data
-                s.NotifyWhenScansQueuedBelow = w/10;
-                s.queueOutputData(MCOutputData);
-                
-                
-                s.Rate = w; 
-                lh = s.addlistener('DataAvailable',@ScopePlotCallback);
-                lhMC = s.addlistener('DataRequired',@PollManualControl);
+            end
+            
+            % start scopes
+            figure(scope_fig)   
+            % create session
+            clear s
+            s = daq.createSession('ni');
+            s.IsContinuous = true;
+            s.NotifyWhenDataAvailableExceeds = w/10; % 10Hz
 
-                
-                % specify each channel's range
+
+
+            % update scope_plot_data
+            scope_plot_data = NaN(length(get(PlotInputs,'Value')),5*w); % 5 s of  data in each channel
+            time = (1/w):(1/w):5;
+            ScopeHandles = []; % axis handles for each sub plot in scope
+            rows = ceil(length(get(PlotInputs,'Value'))/2);
+            ScopeThese = get(PlotInputs,'Value');
+            for k = 1:length(get(PlotInputs,'Value'))
+                ScopeHandles(k) = subplot(2,rows,k);
+                set(ScopeHandles(k),'XLim',[0 5*w],'YLim',[0 5]), hold off
+                ylabel( strcat(InputChannels{UsedInputChannels(k)},' -- ',InputChannelNames{UsedInputChannels(k)}))
+                s.addAnalogInputChannel(DeviceName,InputChannels{UsedInputChannels(ScopeThese(k))}, 'Voltage'); % add channel
+            end
+            clear k
+
+            % MCOutputData = zeros(length(time),length(UsedOutputChannels)+length(UsedDigitalOutputChannels)); 
+            MCOutputData = zeros(w/10,length(UsedOutputChannels)+length(UsedDigitalOutputChannels)); 
+
+            % add analogue channels
+            TheseChannels=OutputChannels(UsedOutputChannels);
+            for k = 1:length(TheseChannels)
+                s.addAnalogOutputChannel(DeviceName,OutputChannels{UsedOutputChannels(k)}, 'Voltage');
+            end
+            clear k
+
+            % add digital channels
+            TheseChannels=DigitalOutputChannels(UsedDigitalOutputChannels);
+            for k = 1:length(TheseChannels)
+                 s.addDigitalChannel(DeviceName,DigitalOutputChannels{UsedDigitalOutputChannels(k)}, 'OutputOnly');
+            end
+            clear k
+
+            % queue data
+            s.NotifyWhenScansQueuedBelow = w/10;
+            s.queueOutputData(MCOutputData);
+
+
+            s.Rate = w; 
+            lh = s.addlistener('DataAvailable',@ScopePlotCallback);
+            lhMC = s.addlistener('DataRequired',@PollManualControl);
+
+
+            % specify each channel's range
 %                 for i = 1:length(s.Channels)
 %                     % figure out which channel it is
 %                     [a,~]=ind2sub(size(InputChannels), strmatch(s.Channels(i).ID, InputChannels, 'exact'));
 %                     s.Channels(i).Range = InputChannelRanges(a)*[-1 1];
 %                 end
 %                 clear i
-                
-                % fix scope labels
-                ScopeThese = 1:length(get(PlotInputs,'Value'));
-                
-                % relabel scopes button
-                set(StartScopes,'String','Stop Scopes');
-                
-                
-                
-                s.startBackground();
-                scopes_running = 1;
-   
-            end
+
+            % fix scope labels
+            ScopeThese = 1:length(get(PlotInputs,'Value'));
+
+            % relabel scopes button
+            set(StartScopes,'String','Stop Scopes');
+
+
+
+            s.startBackground();
+            scopes_running = 1;
+
+            
        
         end
 
