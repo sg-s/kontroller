@@ -6,7 +6,7 @@
 % This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. 
 % To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/.EpochPlot
 % plots traces where differnet traces are coloured by epoch
-function [] = EpochPlot(plothere,plotthese,time,data,Epochs,PlotHandles,plot_length)
+function [] = EpochPlot(plothere,plotthese,time,data,FilterState,PlotHandles,plot_length)
 % 
 % trim data
 if length(data) > plot_length-1
@@ -18,7 +18,6 @@ if length(data) > plot_length-1
             time = time(last_data_point-plot_length+1:last_data_point);
             time = time-max(time);
             data = data(:,last_data_point-plot_length+1:last_data_point);
-            Epochs = Epochs(last_data_point-plot_length+1:last_data_point);
 
             
     end
@@ -37,26 +36,18 @@ end
 
 
 
-% compute epoch starts and stops
-Epochs = Epochs(:);
-nEpochs = length(unique(Epochs));
-EpochBreaks = [1; find(abs(diff(Epochs))); length(Epochs)];
-
-% define colors
-c = {'k','g','r','b','m','k','g','r','b','m'};
-
-
 % plot it
 for i = 1:length(plothere)
-    set(PlotHandles(i),'XData',time,'YData',data(plotthese(i),:));
+    if FilterState(i)
+        % filter the data
+        filtered_trace = filter_trace(data(plotthese(i),:));
+        set(PlotHandles(i),'XData',time,'YData',filtered_trace,'Color',[1 0 0]);
+    else
+        set(PlotHandles(i),'XData',time,'YData',data(plotthese(i),:),'Color',[0 0 0]);
+    end
+
+
+    %set(PlotHandles(i),'XData',time,'YData',data(plotthese(i),:));
 end
 
-% % plot it
-% for i = 1:length(plothere)
-% % 	cla(plothere(i))
-% 	for j = 1:length(EpochBreaks)-1
-% 		thisEpoch = Epochs(EpochBreaks(j)+1);
-% 		plot(plothere(i),time(EpochBreaks(j):EpochBreaks(j+1)),data(plotthese(i),EpochBreaks(j):EpochBreaks(j+1)),c{thisEpoch})
-% 
-% 	end
-% end
+
