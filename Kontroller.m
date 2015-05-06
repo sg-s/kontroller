@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_128_';
+VersionName= 'Kontroller v_129_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -382,6 +382,7 @@ UsedDigitalOutputChannels = [];
 DigitalOutputChannelNames = {}; % this is the user defined names
 UsedOutputChannels = [];
 OutputChannelNames = {}; % this is the user defined names
+FilterState = zeros(100,1);
 
 if gui
     wh.ProgressRatio  =0.7;
@@ -602,7 +603,7 @@ end
 
     end
 
-
+%%  set paradigm
     function [] = SetParadigm(SelectedParadigm,~)
         % figure out how many images are in this paradigm
         ThisParadigm = find(ParadigmHandles == SelectedParadigm);
@@ -1207,9 +1208,12 @@ end
                 ScopeHandles = []; % axis handles for each sub plot in scope
                 rows = ceil(length(get(PlotInputs,'Value'))/2);
                 ScopeThese = get(PlotInputs,'Value');
+
                 for i = 1:length(get(PlotInputs,'Value'))
                     ScopeHandles(i) = subplot(2,rows,i);
-                    set(ScopeHandles(i),'XLim',[0 5000]), hold off
+                    PlotHandles(i) = plot(ScopeHandles(i),NaN,NaN);
+                    set(ScopeHandles(i),'ButtonDownFcn',@ToggleFilterState);
+                               
                     ylabel( strcat(InputChannels{UsedInputChannels(i)},' -- ',InputChannelNames{UsedInputChannels(i)}))
                     s.addAnalogInputChannel(DeviceName,InputChannels{UsedInputChannels(ScopeThese(i))}, 'Voltage'); % add channel
                 end
@@ -1242,6 +1246,16 @@ end
         end   
     end
 
+
+%% toggle filter state
+    function [] = ToggleFilterState(src,~)
+        if FilterState(ScopeHandles == src)
+            FilterState(ScopeHandles == src) = 0;
+        else
+            FilterState(ScopeHandles == src) = 1;
+        end
+    end
+
 %% Scope Plot Callback
 
     function [] = ScopePlotCallback(~,event)
@@ -1256,11 +1270,19 @@ end
         scope_plot_data = [scope_plot_data event.Data'];
         
         
-        
         for si = ScopeThese
-            plot(ScopeHandles(si),time,scope_plot_data(si,:));
+            if FilterState(si)
+                % filter the data
+                filtered_trace = filter_trace(scope_plot_data(si,:));
+                set(PlotHandles(si),'XData',time,'YData',filtered_trace,'Color',[1 0 0]);
+            else
+                set(PlotHandles(si),'XData',time,'YData',scope_plot_data(si,:),'Color',[0 0 1]);
+            end
+            
         end
     end
+
+
 
 
 %% plot live data to scopes and grab data
@@ -1281,7 +1303,7 @@ end
             % crash
             plot_length = str2double(get(plot_only_control,'String'));
 
-            EpochPlot(ScopeHandles(ScopeThese),ScopeThese,time,scope_plot_data,Epochs,PlotHandles(ScopeThese),plot_length);
+            EpochPlot(ScopeHandles(ScopeThese),ScopeThese,time,scope_plot_data,FilterState,PlotHandles(ScopeThese),plot_length);
 
             trial_running = trial_running - 1;
         else
@@ -1753,6 +1775,7 @@ end
         ti = 1;
         for i = ScopeThese
             ScopeHandles(i) = subplot(2,rows,ti); ti = ti+1;
+            set(ScopeHandles(i),'ButtonDownFcn',@ToggleFilterState);
             cla(ScopeHandles(i));
             PlotHandles(i) = plot(NaN,NaN,'k');
             set(ScopeHandles(i),'XLim',[0 T])
