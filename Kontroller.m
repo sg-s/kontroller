@@ -925,7 +925,7 @@ function [] =ManualControlCallback(~,~)
             for k = 1:length(get(PlotInputs,'Value'))
                 ScopeHandles(k) = subplot(2,rows,k);
                 set(ScopeHandles(k),'XLim',[0 5*w],'YLim',[0 5]), hold off
-                ylabel( strcat(InputChannels{UsedInputChannels(k)},' -- ',InputChannelNames{UsedInputChannels(k)}))
+                ylabel( strcat(InputChannels{UsedInputChannels(ScopeThese(k))},' -- ',InputChannelNames{UsedInputChannels(ScopeThese(k))}))
                 s.addAnalogInputChannel(DeviceName,InputChannels{UsedInputChannels(ScopeThese(k))}, 'Voltage'); % add channel
             end
             clear k
@@ -1214,7 +1214,7 @@ end
                     PlotHandles(i) = plot(ScopeHandles(i),NaN,NaN);
                     set(ScopeHandles(i),'ButtonDownFcn',@ToggleFilterState);
                                
-                    ylabel( strcat(InputChannels{UsedInputChannels(i)},' -- ',InputChannelNames{UsedInputChannels(i)}))
+                    ylabel( strcat(InputChannels{UsedInputChannels(ScopeThese(i))},' -- ',InputChannelNames{UsedInputChannels(ScopeThese(i))}))
                     s.addAnalogInputChannel(DeviceName,InputChannels{UsedInputChannels(ScopeThese(i))}, 'Voltage'); % add channel
                 end
                 clear i
