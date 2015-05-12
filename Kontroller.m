@@ -922,9 +922,11 @@ function [] =ManualControlCallback(~,~)
             ScopeHandles = []; % axis handles for each sub plot in scope
             rows = ceil(length(get(PlotInputs,'Value'))/2);
             ScopeThese = get(PlotInputs,'Value');
+            PlotHandles = [];
             for k = 1:length(get(PlotInputs,'Value'))
                 ScopeHandles(k) = subplot(2,rows,k);
-                set(ScopeHandles(k),'XLim',[0 5*w],'YLim',[0 5]), hold off
+                PlotHandles(k) = plot(ScopeHandles(k),NaN,NaN);
+                %set(ScopeHandles(k),'XLim',[0 5*w],'YLim',[0 5])
                 ylabel( strcat(InputChannels{UsedInputChannels(ScopeThese(k))},' -- ',InputChannelNames{UsedInputChannels(ScopeThese(k))}))
                 s.addAnalogInputChannel(DeviceName,InputChannels{UsedInputChannels(ScopeThese(k))}, 'Voltage'); % add channel
             end
@@ -957,20 +959,12 @@ function [] =ManualControlCallback(~,~)
             lhMC = s.addlistener('DataRequired',@PollManualControl);
 
 
-            % specify each channel's range
-%                 for i = 1:length(s.Channels)
-%                     % figure out which channel it is
-%                     [a,~]=ind2sub(size(InputChannels), strmatch(s.Channels(i).ID, InputChannels, 'exact'));
-%                     s.Channels(i).Range = InputChannelRanges(a)*[-1 1];
-%                 end
-%                 clear i
 
             % fix scope labels
             ScopeThese = 1:length(get(PlotInputs,'Value'));
 
             % relabel scopes button
             set(StartScopes,'String','Stop Scopes');
-
 
 
             s.startBackground();
