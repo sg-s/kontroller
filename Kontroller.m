@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_129_';
+VersionName= 'Kontroller v_130_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -1662,7 +1662,7 @@ end
         nrows = floor(sqrt(no));
         ncols = ceil(no/nrows);
         
-        ViewParadigmFig = figure('Position',[500 150 750 650],'Toolbar','none','Menubar','none','Name','Control Signals','NumberTitle','off','Resize','on'); hold on; 
+        ViewParadigmFig = figure('Position',[500 150 750 650],'Name','Control Signals','NumberTitle','off','Resize','on'); hold on; 
         hold on
         sr = str2double(get(SamplingRateControl,'String'));
         t  = (1:length(ControlParadigm(get(ParadigmListDisplay,'Value')).Outputs))/sr;
