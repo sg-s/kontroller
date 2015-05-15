@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_130_';
+VersionName= 'Kontroller v_131_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -925,7 +925,9 @@ function [] =ManualControlCallback(~,~)
             PlotHandles = [];
             for k = 1:length(get(PlotInputs,'Value'))
                 ScopeHandles(k) = subplot(2,rows,k);
+                
                 PlotHandles(k) = plot(ScopeHandles(k),NaN,NaN);
+                set(ScopeHandles(k),'ButtonDownFcn',@ToggleFilterState);
                 %set(ScopeHandles(k),'XLim',[0 5*w],'YLim',[0 5])
                 ylabel( strcat(InputChannels{UsedInputChannels(ScopeThese(k))},' -- ',InputChannelNames{UsedInputChannels(ScopeThese(k))}))
                 s.addAnalogInputChannel(DeviceName,InputChannels{UsedInputChannels(ScopeThese(k))}, 'Voltage'); % add channel
@@ -966,7 +968,7 @@ function [] =ManualControlCallback(~,~)
             % relabel scopes button
             set(StartScopes,'String','Stop Scopes');
 
-
+            
             s.startBackground();
             scopes_running = 1;
 
@@ -1243,6 +1245,7 @@ end
 
 %% toggle filter state
     function [] = ToggleFilterState(src,~)
+
         if FilterState(ScopeHandles == src)
             FilterState(ScopeHandles == src) = 0;
         else
