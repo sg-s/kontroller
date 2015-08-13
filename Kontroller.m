@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_131_';
+VersionName= 'Kontroller v_132_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -218,7 +218,6 @@ Epochs = [];
 CustomSequence = [];
 webcam_buffer = []; % this is a structure used to properly pack images into data
 
-
 %% initlaise some metadata
 if gui
     wh.ProgressRatio  =0.3;
@@ -309,7 +308,7 @@ if gui
     RepeatNTimesControl = uicontrol(AutomatePanel,'Style','edit','FontSize',8,'String','1','Position',[110 140 30 30]);
     RunProgramButton = uicontrol(AutomatePanel,'Position',[4 5 110 30],'Enable','off','Style','pushbutton','String','RUN PROGRAM','Callback',@RunProgram);
     PauseProgramButton = uicontrol(AutomatePanel,'Position',[124 5 80 30],'Enable','off','Style','togglebutton','String','PAUSE','Callback',@PauseProgram);
-    AbortProgramButton = uicontrol(AutomatePanel,'Position',[124 40 80 30],'Enable','off','Style','togglebutton','String','ABORT');
+    AbortProgramButton = uicontrol(AutomatePanel,'Position',[124 40 80 30],'Enable','off','Style','pushbutton','String','ABORT','Callback',@AbortTrial);
 
     uicontrol(AutomatePanel,'Style','text','FontSize',8,'String','Do this between trials:','Position',[1 70 100 50])
     InterTrialIntervalControl = uicontrol(AutomatePanel,'Style','edit','FontSize',8,'String','pause(20)','Position',[110 100 100 30]);
@@ -342,20 +341,12 @@ end
 
 %% figure out DAQ characteristics and initialise
 
-if gui
-    wh.ProgressRatio  =0.6;
-    % waitbar(0.6,wh,'Scanning hardware...'); figure(wh)
-else
+if ~gui
     disp('Scanning hardware...')
 end
-if demo_mode 
-else
+if ~demo_mode 
     d = daq.getDevices(); % this line takes a long time when you run it for the first time...
 end
-
-% if gui
-%     figure(wh)
-% end
 
 if ~demo_mode
     try
@@ -542,6 +533,11 @@ if ~gui
     end
 end
 
+
+%% abort trial
+    function [] = AbortTrial(~,~)
+        s.stop;
+    end
 
 %% clear scopes
     function [] = ClearScopes(~,~)
@@ -1279,9 +1275,6 @@ end
         end
     end
 
-
-
-
 %% plot live data to scopes and grab data
     function [] = PlotCallback(~,event)
         sz = size(scope_plot_data);
@@ -1697,11 +1690,10 @@ end
         set(SaveControlParadigmsButton,'Enable','off');
         set(RemoveControlParadigmsButton,'Enable','off');
         
+        % enable abort button
+        set(AbortProgramButton,'Enable','on');
+        
         ComputeEpochs;
-        
-
-        
-        
         
         if scopes_running
             % stop scopes
@@ -1828,6 +1820,7 @@ end
             end
         end
         
+        
         % read and write
         trial_running = T*10;
         try
@@ -1886,11 +1879,13 @@ end
         
         % combine data and label correctly
         thisdata=scope_plot_data;
+       
         if gui
             ThisParadigm= (get(ParadigmListDisplay,'Value'));
         else
             ThisParadigm = RunTheseParadigms(gi);
         end
+        
         % check if data exists
         if isempty(data)
             % create it          
@@ -1934,7 +1929,7 @@ end
             end
         end
         webcam_buffer = [];
-        
+       
         
         % save data to file
         if gui
