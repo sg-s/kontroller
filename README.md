@@ -49,15 +49,17 @@ Don't want to record data but just see what your data stream looks like? A handy
 The recommended way to install `kontroller` is to use my package manager:
 
 ```matlab
->> urlwrite('http://srinivas.gs/install.m','install.m'); 
->> install kontroller
->> install srinivas.gs_mtools
+% copy and paste this into your MATLAB prompt
+urlwrite('http://srinivas.gs/install.m','install.m'); 
+install kontroller
+install srinivas.gs_mtools
 ```
 if you have [git](http://www.git-scm.com/) installed, you can 
 
 ```bash
+# copy and paste this into into your shell
 git clone https://github.com/sg-s/kontroller
-git clone https://github.com/sg-s/srinivas.gs_mtools # kontroller needs this to work
+git clone https://github.com/sg-s/srinivas.gs_mtools 
 ```
 and don't forget to add these folders to your `MATLAB path`
 
