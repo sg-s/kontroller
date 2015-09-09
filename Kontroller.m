@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_133_';
+VersionName= 'Kontroller v_134_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -316,7 +316,7 @@ if gui
 
 
     ManualControlButton = uicontrol(f1,'Position',[12 240 170 30],'Enable','on','Style','pushbutton','String','Manual Control','Callback',@ManualControlCallback);
-    MetadataButton = uicontrol(f1,'Position',[12 280 170 30],'Enable','on','Style','pushbutton','String','Add Metadata...','Callback',@MetadataCallback);
+    MetadataButton = uicontrol(f1,'Position',[12 280 170 30],'Enable','on','Style','pushbutton','String','Add Metadata...','Callback',@MetadataCallback,'BackgroundColor',[1 .5 .5]);
 
     wh.ProgressRatio  =0.5;
     % waitbar(0.5,wh,'Generating global variables...'); figure(wh)
@@ -1414,6 +1414,10 @@ end
         data = []; % clears the data, so that new data is written to the new file
         sequence=  [];
         sequence_step = [];
+
+        % reset metadata indicator
+        set(MetadataButton,'BackgroundColor',[1 .5 .5]);
+
          
     end
 
@@ -1443,6 +1447,9 @@ end
             sequence=  [];
             sequence_step = [];
             SaveToFile = get(FileNameDisplay,'String');
+
+            % reset metadata indicator
+            set(MetadataButton,'BackgroundColor',[1 .5 .5]);
         end
             
     end
@@ -2070,6 +2077,9 @@ end
             end
             set(MetadataTextDisplay,'String',metadatatext);
             set(MetadataTextControl,'String','');
+
+            % remove the nagging colour from the metadata control button
+            set(MetadataButton,'BackgroundColor',[1 1 1]);
         catch
             
         end
