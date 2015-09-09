@@ -66,7 +66,7 @@
 
 
 function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_132_';
+VersionName= 'Kontroller v_133_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -2010,23 +2010,71 @@ end
         % open the editor
         mef = figure('Position',[60 50 450 400],'Toolbar','none','Menubar','none','Name','Metadata Editor','NumberTitle','off','Resize','off');
         uicontrol(mef,'Style','Text','String','Add or modify metadata using standard MATLAB syntax, one variable at a time, below:','Position',[5 340 440 50],'HorizontalAlignment','left')
-        MetadataTextControl = uicontrol(mef,'Style', 'edit', 'String','','Position',[5 285 440 40],'HorizontalAlignment','left','Callback',@AddMetadata);
-        MetadataTextDisplay = uicontrol(mef,'Style','Text','String',metadatatext,'Position',[5 5 440 270]);
+        % MetadataTextControl = uicontrol(mef,'Style', 'edit', 'String','','Position',[5 285 440 40],'HorizontalAlignment','left','Callback',@AddMetadata);
+        MetadataTextDisplay = uicontrol(mef,'Style','Text','String',metadatatext,'Position',[25 5 400 220]);
+
+        % configure autocomplete
+        autocompletionList = cache('autocompletionList');
+        if ~iscell(autocompletionList)
+            autocompletionList = {autocompletionList};
+        end
+        if ~isempty(autocompletionList)
+            strs = autocompletionList;
+            strList = java.util.ArrayList;
+            for idx = 1 : length(strs),  strList.add(strs{idx});  end
+            jPanelObj = com.mathworks.widgets.AutoCompletionList(strList,'');
+            javacomponent(jPanelObj.getComponent, [25 250 400 100], gcf);
+            jPanelObj.setStrict(false);
+            jPanelObj.setVisibleRowCount(1);
+            set(handle(jPanelObj,'callbackproperties'), 'ActionPerformedCallback', @AddMetadata);
+        end
+        
         
     end
 
 %% metadata editor callback
-    function [] = AddMetadata(~,~)        
-        % evaluate it
-        eval(strcat('metadata.',get(MetadataTextControl,'String')));
-        % rebuild display cell string
-        metadatatext = [];
-        fn = fieldnames(metadata);
-        for i = 1:length(fn)
-            metadatatext{i} = strcat(fn{i},' : ',mat2str(getfield(metadata,fn{i})));
+    function [] = AddMetadata(src,~)   
+        % evaluate only if the string is terminated with a semi-colon
+        entered_string = get(src,'SelectedValue');
+        if length(entered_string) == 0
+            return
         end
-        set(MetadataTextDisplay,'String',metadatatext);
-        set(MetadataTextControl,'String','');
+        if ~strcmp(entered_string(end),';')
+            return
+        end
+        % load autocompletion list
+        autocompletionList = cache('autocompletionList');
+        %  remember this for later for autocompletion purposes
+        if isempty(find(strcmp(entered_string,autocompletionList)))
+            if isempty(autocompletionList)
+                autocompletionList = cell(1);
+                autocompletionList{1} = entered_string;
+            else
+                autocompletionList = [autocompletionList entered_string];
+            end
+            
+            cache('autocompletionList',[]);
+            cache('autocompletionList',autocompletionList);
+        else
+            
+        end
+
+        % evaluate it
+        try
+            eval(strcat('metadata.',entered_string,';'));
+            % rebuild display cell string
+            metadatatext = [];
+            fn = fieldnames(metadata);
+            for i = 1:length(fn)
+                metadatatext{i} = strcat(fn{i},' : ',mat2str(getfield(metadata,fn{i})));
+            end
+            set(MetadataTextDisplay,'String',metadatatext);
+            set(MetadataTextControl,'String','');
+        catch
+            
+        end
+
+
         
     end
 
