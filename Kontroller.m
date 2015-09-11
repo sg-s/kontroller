@@ -1,5 +1,6 @@
-% Kontroller.m
-% Kontroller is at http://github.com/sg-s/kontroller/
+% kontroller.m
+% wrapper for MATLAB DAQ that makes it easy to acquire data and perform experiemnts
+% kontroller is at http://github.com/sg-s/kontroller/
 % 
 % created by Srinivas Gorur-Shandilya. Contact me at http://srinivas.gs/contact/
 % 
@@ -8,8 +9,8 @@
 %
 % === 1. Basic Use ===
 % 
-% 1. run Kontroller by typing "Kontroller"
-% 2. Kontroller will automatically detect NI hardware and determine
+% 1. run kontroller by typing "kontroller"
+% 2. kontroller will automatically detect NI hardware and determine
 % which channels you can use
 % 3. Click on "configure inputs". To configure analogue inputs, call
 % the channel you want to use something in the text field. Specify the input range as a number in
@@ -29,25 +30,25 @@
 % scopes" to look at your input live. 
 % 9. If you want to run a trial, choose a control paradigm from the paradigm list
 % and press "run"
-% 10. Kontroller will save all data as .mat files in c:\data\
+% 10. kontroller will save all data as .mat files in c:\data\
 %
 % === 2. Advanced Use: ControlParadigms ===
 %
 % 1. You can create your own ControlParadigms and save them to file, such
-% that the name contains the string "*_Kontroller_paradigm*". Make sure
+% that the name contains the string "*_kontroller_paradigm*". Make sure
 % this file contains a structure called ControlParadigm, where each element
 % of the structure has a MxN array called Outputs, where M is the number of
 % channels you want to write to, and N is the number of samples. Each
 % element of ControlParadigm should also have a field called "Name" that is
 % the name of the ControlParadigm. 
 % 
-% === 3.  Expert Use: Scripting Kontroller=
+% === 3.  Expert Use: Scripting kontroller=
 %
-% Kontroller can be called as a function from your own script. 
+% kontroller can be called as a function from your own script. 
 % 
 % Example Usage:
 % 
-% data = Kontroller('ControlParadigm',ControlParadigm,'RunTheseParadigms',[1 3],'w',1000);
+% data = kontroller('ControlParadigm',ControlParadigm,'RunTheseParadigms',[1 3],'w',1000);
 %
 % will run paradigms 1 and 3 in the ControlParadiagm Structure at 1000Hz
 % and return the recorded data to a structure called data. 
@@ -65,8 +66,8 @@
 % http://github.com/sg-s/kontroller
 
 
-function [data] = Kontroller(varargin)
-VersionName= 'Kontroller v_134_';
+function [data] = kontroller(varargin)
+VersionName = 'kontroller v_134_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -92,7 +93,7 @@ end
 
 if ~gui
     if isempty(RunTheseParadigms) || isempty(ControlParadigm)
-        error('Kontroller does not know what control paradigms to run.')
+        error('kontroller does not know what control paradigms to run.')
     end
 end
 
@@ -104,30 +105,28 @@ j = find(strcmp('Data Acquisition Toolbox', v), 1);
 if ~isempty(j)
 else
     % No DAQ toolbox
-    warning('Kontroller needs the <a href="http://www.mathworks.com/products/daq/">DAQ toolbox</a> to run, which was not detected. Kontroller will now run in demo mode')
+    warning('kontroller needs the <a href="http://www.mathworks.com/products/daq/">DAQ toolbox</a> to run, which was not detected. kontroller will now run in demo mode')
     demo_mode = 1;
 end
 clear j
 
 
 % check for internal dependencies
-dependencies = {'oval','strkat','PrettyFig','CheckForNewestVersionOnGitHub'};
+dependencies = {'oval','strkat','prettyFig','checkForNewestVersionOnGitHub'};
 for ii = 1:length(dependencies)
     if exist(dependencies{ii}) ~= 2
-        error('Kontroller is missing an external function that it needs to run. You can download it <a href="https://github.com/sg-s/srinivas.gs_mtools">here.</a>')
+        error('kontroller is missing an external function that it needs to run. You can download it <a href="https://github.com/sg-s/srinivas.gs_mtools">here.</a>')
     end
 end
 clear ii
 
-% check for new version of Kontroller
+% check for new version of kontroller
 if gui
-    wh = SplashScreen( 'Splashscreen', 'title.png','ProgressBar', 'on','ProgressPosition', 5, 'ProgressRatio', 0.1 );
-    wh.addText( 30, 50, 'Kontroller is starting...', 'FontSize', 20, 'Color', 'k' );
-    % wh = waitbar(0.1,'Kontroller is starting...');
+    wh = SplashScreen( 'kontroller', 'title.png','ProgressBar', 'on','ProgressPosition', 5, 'ProgressRatio', 0.1 );
+    wh.addText( 30, 50, 'kontroller is starting...', 'FontSize', 20, 'Color', 'k' );
     if online
         wh.ProgressRatio  =0.2;
-        % waitbar(0.2,wh,'Checking for updates...'); figure(wh)
-        if CheckForNewestVersionOnGitHub('kontroller',mfilename,VersionName);
+        if checkForNewestVersionOnGitHub('kontroller',mfilename,VersionName);
             disp('You can update kontroller using "install -f kontroller"')
         end
     else
@@ -146,7 +145,7 @@ end
 if exist('c:\data\','dir') == 7
 else
     if gui && ~demo_mode
-        disp('Kontroller will default to storing recorded data in c:\data. This directory will now be created...')
+        disp('kontroller will default to storing recorded data in c:\data. This directory will now be created...')
         mkdir('c:\data\')
     end
     
@@ -163,11 +162,11 @@ lh = []; % generic listener ID
 lhMC = []; % listener for manual control
 
 %  figure handles
-f1 = []; f2=[]; f3 = []; f4 = [];
-fcs=[];
-mef = []; % figure for metadata editor
-ViewParadigmFig = [];
-fMC  = []; % figure handles for manual control UI
+handles.main_figure = []; handles.configure_input_channels_figure=[]; handles.configure_output_channels_figure = []; handles.configure_digital_output_channels_figure = [];
+handles.configure_control_signals_figure=[];
+handles.metadata_editor_figure = []; % figure for metadata editor
+handles.view_paradigm_figure = [];
+handles.manual_control_figure  = []; % figure handles for manual control UI
 fMCD = [];
 
 % uicontrol handles
@@ -176,8 +175,8 @@ lo = []; ro = [];  % analogue outputs handles
 dlo = []; dro = []; % digital outputs handles
 MetadataTextControl= []; % handle for metadata control
 MetadataTextDisplay = []; % handle for metadata display
-ScopeHandles = [];
-PlotHandles = []; % plotHandles is used by EpochPlot to plot; useful because we reset data instead of actually replotting
+handles.scope_handles = [];
+handles.plot_handles = []; % plotHandles is used by EpochPlot to plot; useful because we reset data instead of actually replotting
 ControlHandles= [];
 ParadigmNameUI = [];
 MCoi = []; 
@@ -185,7 +184,7 @@ MCNumoi = []; % this is for manually entering a specific set point via a edit fi
 plot_only_control = [];
 MCDhandle = [];
 
-% used by Kontroller in demo mode
+% used by kontroller in demo mode
 ParadigmHandles= [];
 TrialHandles = [];
 ThisParadigm = [];
@@ -228,7 +227,7 @@ if ~demo_mode
     d = daq.getDevices;
 else
     d.ID = 'Demo DAQ';
-    d.Model = 'Kontroller Demo';
+    d.Model = 'kontroller Demo';
 end
 if length(d) > 1
     UseThisDevice = SelectNIDevice(d);
@@ -237,13 +236,13 @@ elseif length(d) == 0
 end
 DeviceName = d(UseThisDevice).ID;
 metadata.daqName = d(UseThisDevice).Model;
-metadata.KontrollerVersion = VersionName;
+metadata.kontrollerVersion = VersionName;
 if ispc
     metadata.ComputerName = getenv('COMPUTERNAME');
 else
     [~,metadata.ComputerName] = system('hostname');
 end
-metadata.SessionName = RandomString(10);
+metadata.SessionName = randomString(10);
 fn = fieldnames(metadata);
 for i = 1:length(fn)
     metadatatext{i} = strcat(fn{i},' : ',mat2str(getfield(metadata,fn{i}))); %#ok<AGROW>
@@ -253,8 +252,8 @@ set(MetadataTextDisplay,'String',metadatatext);
 set(MetadataTextControl,'String','');
 
 % check to see if sampling rate is stored. 
-if exist('Kontroller.SamplingRate.mat','file') == 2
-    load('Kontroller.SamplingRate.mat');
+if exist('kontroller.SamplingRate.mat','file') == 2
+    load('kontroller.SamplingRate.mat');
 else
     % default
     w = 1000;
@@ -264,13 +263,13 @@ end
 %% make the GUI
 if gui
 
-    f1 = figure('Position',[20 60 450 700],'Toolbar','none','Menubar','none','Name',strrep(VersionName,'_',''),'NumberTitle','off','Resize','off','HandleVisibility','on','CloseRequestFcn',@QuitKontrollerCallback);
-    WebcamMenu = uimenu(f1,'Label','Webcam','Enable','off');
+    handles.main_figure = figure('Position',[20 60 450 700],'Toolbar','none','Menubar','none','Name',strrep(VersionName,'_',''),'NumberTitle','off','Resize','off','HandleVisibility','on','CloseRequestFcn',@QuitkontrollerCallback);
+    WebcamMenu = uimenu(handles.main_figure,'Label','Webcam','Enable','off');
     PreviewWebcamItem = uimenu(WebcamMenu,'Label','Preview','Callback',@PreviewWebcam);
     wh.ProgressRatio  =0.4;
     AnnotateWebcamItem = uimenu(WebcamMenu,'Label','Annotate...','Callback',@LaunchImageAnnotator);
     % waitbar(0.4,wh,'Generating UI...'); figure(wh)
-    Konsole = uicontrol('Position',[15 600 425 90],'Style','text','String','Kontroller is starting...','FontName','Courier','HorizontalAlignment','left');
+    Konsole = uicontrol('Position',[15 600 425 90],'Style','text','String','kontroller is starting...','FontName','Courier','HorizontalAlignment','left');
     ConfigureInputChannelButton = uicontrol('Position',[15 540 140 50],'Style','pushbutton','Enable','off','String','Configure Inputs','FontSize',10,'Callback',@ConfigureInputChannels);
     ConfigureOutputChannelButton = uicontrol('Position',[160 540 140 50],'Style','pushbutton','Enable','off','String','Configure Outputs','FontSize',10,'Callback',@ConfigureOutputChannels);
     ConfigureControlSignalsButton = uicontrol('Position',[305 540 140 50],'Style','pushbutton','Enable','off','String','Configure Control','FontSize',10,'Callback',@ConfigureControlSignals);
@@ -291,15 +290,15 @@ if gui
     ParadigmNameDisplay = uicontrol(ParadigmPanel,'Position',[3,150,150,25],'Style','text','String','No Controls configured');
 
 
-    SamplingRateControl = uicontrol(f1,'Position',[133 5 50 20],'Style','edit','String',mat2str(w),'Callback',@SamplingRateCallback);
-    uicontrol(f1,'Position',[20 5 100 20],'Style','text','String','Sampling Rate');
-    RunTrialButton = uicontrol(f1,'Position',[320 5 110 50],'Enable','off','BackgroundColor',[0.8 0.9 0.8],'Style','pushbutton','String','RUN w/o saving','FontWeight','bold','Callback',@RunTrial);
+    SamplingRateControl = uicontrol(handles.main_figure,'Position',[133 5 50 20],'Style','edit','String',mat2str(w),'Callback',@SamplingRateCallback);
+    uicontrol(handles.main_figure,'Position',[20 5 100 20],'Style','text','String','Sampling Rate');
+    RunTrialButton = uicontrol(handles.main_figure,'Position',[320 5 110 50],'Enable','off','BackgroundColor',[0.8 0.9 0.8],'Style','pushbutton','String','RUN w/o saving','FontWeight','bold','Callback',@RunTrial);
 
-    FileNameDisplay = uicontrol(f1,'Position',[200,60,230,50],'Style','edit','String','No destination file selected','Callback',@SaveToFileTextEdit);
+    FileNameDisplay = uicontrol(handles.main_figure,'Position',[200,60,230,50],'Style','edit','String','No destination file selected','Callback',@SaveToFileTextEdit);
     if ~demo_mode
-        FileNameSelect = uicontrol(f1,'Position',[200,5,100,50],'Style','pushbutton','String','Write to...','Callback',@SelectDestinationCallback);
+        FileNameSelect = uicontrol(handles.main_figure,'Position',[200,5,100,50],'Style','pushbutton','String','Write to...','Callback',@SelectDestinationCallback);
     else
-        FileNameSelect = uicontrol(f1,'Position',[200,5,100,50],'Style','pushbutton','String','Load data...','Callback',@LoadKontrollerData);
+        FileNameSelect = uicontrol(handles.main_figure,'Position',[200,5,100,50],'Style','pushbutton','String','Load data...','Callback',@LoadkontrollerData);
     end
 
     AutomatePanel = uipanel('Title','Automate','FontSize',12,'units','pixels','pos',[205 120 230 200]);
@@ -315,27 +314,27 @@ if gui
     RandomizeControl = uicontrol(AutomatePanel,'Style','popupmenu','String',{'Randomise','Interleave','Block','Reverse Block','Custom'},'Value',2,'FontSize',8,'Position',[5 50 100 20],'Callback',@RandomiseControlCallback);
 
 
-    ManualControlButton = uicontrol(f1,'Position',[12 240 170 30],'Enable','on','Style','pushbutton','String','Manual Control','Callback',@ManualControlCallback);
-    MetadataButton = uicontrol(f1,'Position',[12 280 170 30],'Enable','on','Style','pushbutton','String','Add Metadata...','Callback',@MetadataCallback,'BackgroundColor',[1 .5 .5]);
+    ManualControlButton = uicontrol(handles.main_figure,'Position',[12 240 170 30],'Enable','on','Style','pushbutton','String','Manual Control','Callback',@ManualControlCallback);
+    MetadataButton = uicontrol(handles.main_figure,'Position',[12 280 170 30],'Enable','on','Style','pushbutton','String','Add Metadata...','Callback',@MetadataCallback,'BackgroundColor',[1 .5 .5]);
 
     wh.ProgressRatio  =0.5;
     % waitbar(0.5,wh,'Generating global variables...'); figure(wh)
     if demo_mode
-        StartScopes = uicontrol(f1,'Position',[260 465 150 50],'Style','pushbutton','Enable','off','String','Clear Scopes','FontSize',12,'Callback',@ClearScopes);
+        StartScopes = uicontrol(handles.main_figure,'Position',[260 465 150 50],'Style','pushbutton','Enable','off','String','Clear Scopes','FontSize',12,'Callback',@ClearScopes);
     else
-        StartScopes = uicontrol(f1,'Position',[260 465 150 50],'Style','pushbutton','Enable','off','String','Start Scopes','FontSize',12,'Callback',@ScopeCallback);
+        StartScopes = uicontrol(handles.main_figure,'Position',[260 465 150 50],'Style','pushbutton','Enable','off','String','Start Scopes','FontSize',12,'Callback',@ScopeCallback);
     end
     
     scsz = get(0,'ScreenSize');
-    scope_fig = figure('Position',[500 100 scsz(3)-500 scsz(4)-200],'Toolbar','none','Name','Oscilloscope','NumberTitle','off','Resize','on','Visible','off','CloseRequestFcn',@QuitKontrollerCallback); hold on; 
+    handles.scope_fig = figure('Position',[500 100 scsz(3)-500 scsz(4)-200],'Toolbar','none','Name','Oscilloscope','NumberTitle','off','Resize','on','Visible','off','CloseRequestFcn',@QuitkontrollerCallback); hold on; 
     
     
     % scope figure controls
-    ParadigmMenu = uimenu(scope_fig,'Label','Paradigm','Enable','off');
-    TrialMenu = uimenu(scope_fig,'Label','Trial #','Enable','off');
-    uicontrol(scope_fig,'Style','text','FontSize',8,'String','Plot only last','Position',[100 scsz(4)-220 100 20])
-    plot_only_control=uicontrol(scope_fig,'Style','edit','FontSize',8,'String','Inf','Position',[200 scsz(4)-220 70 22]);
-    uicontrol(scope_fig,'Style','text','FontSize',8,'String','samples','Position',[270 scsz(4)-220 100 20])
+    ParadigmMenu = uimenu(handles.scope_fig,'Label','Paradigm','Enable','off');
+    TrialMenu = uimenu(handles.scope_fig,'Label','Trial #','Enable','off');
+    uicontrol(handles.scope_fig,'Style','text','FontSize',8,'String','Plot only last','Position',[100 scsz(4)-220 100 20])
+    plot_only_control=uicontrol(handles.scope_fig,'Style','edit','FontSize',8,'String','Inf','Position',[200 scsz(4)-220 70 22]);
+    uicontrol(handles.scope_fig,'Style','text','FontSize',8,'String','samples','Position',[270 scsz(4)-220 100 20])
     
 end
 
@@ -352,14 +351,14 @@ if ~demo_mode
     try
         OutputChannels =  d(UseThisDevice).Subsystems(2).ChannelNames;
     catch
-        error('Something went wrong when trying to talk to the NI device. This is probably because it is not plugged in properly. Try restarting the DAQ, and restart Kontroller.')
+        error('Something went wrong when trying to talk to the NI device. This is probably because it is not plugged in properly. Try restarting the DAQ, and restart kontroller.')
     end
 else
     OutputChannels = {'ao0','ao1','ao2','ao3'};
     d.Subsystems(1).ChannelNames = {'ai0','ai1','ai2','ai3','ai4','ai5','ai6','ai7','ai8','ai9','ai10','ai11'};
     d.Subsystems(2).ChannelNames = {'di0','di1'};
     d.Subsystems(3).ChannelNames = {'do0','do1','do2','do3','do4','do5','do6','do7'};
-    d.Vendor.FullName = 'Kontroller Demo';
+    d.Vendor.FullName = 'kontroller Demo';
 end
 nOutputChannels = length(OutputChannels);
 InputChannels =  d(UseThisDevice).Subsystems(1).ChannelNames;
@@ -380,9 +379,9 @@ if gui
     % waitbar(0.7,wh,'Checking for input config...'); figure(wh)
 end
 % load saved configs...inputs
-if ~isempty(dir('Kontroller.Config.Input.mat'))
+if ~isempty(dir('kontroller.Config.Input.mat'))
     
-    load('Kontroller.Config.Input.mat','UsedInputChannels','InputChannelNames','InputChannelRanges')
+    load('kontroller.Config.Input.mat','UsedInputChannels','InputChannelNames','InputChannelRanges')
     if gui
         disp('Loading saved input config files...')
         PlotInputsList = InputChannelNames(UsedInputChannels);
@@ -398,9 +397,9 @@ if ~isempty(dir('Kontroller.Config.Input.mat'))
 end
 
 % load sampling rate
-if ~isempty(dir('Kontroller.Config.SamplingRate.mat'))
+if ~isempty(dir('kontroller.Config.SamplingRate.mat'))
     
-    load('Kontroller.Config.SamplingRate.mat','w')
+    load('kontroller.Config.SamplingRate.mat','w')
     if gui
         disp('Loading saved sampling rate...')
 
@@ -417,9 +416,9 @@ end
 if gui
     set(ConfigureControlSignalsButton,'Enable','off')
 end
-if ~isempty(dir('Kontroller.Config.Output.mat'))
+if ~isempty(dir('kontroller.Config.Output.mat'))
     
-    load('Kontroller.Config.Output.mat','UsedOutputChannels','OutputChannelNames')
+    load('kontroller.Config.Output.mat','UsedOutputChannels','OutputChannelNames')
     if gui
         disp('Loading saved output config files...')
          if ~isempty(UsedOutputChannels)
@@ -433,9 +432,9 @@ if ~isempty(dir('Kontroller.Config.Output.mat'))
      
 end
 % load saved digital output configs
-if ~isempty(dir('Kontroller.Config.Output.Digital.mat'))
+if ~isempty(dir('kontroller.Config.Output.Digital.mat'))
     
-    load('Kontroller.Config.Output.Digital.mat','UsedDigitalOutputChannels','DigitalOutputChannelNames')
+    load('kontroller.Config.Output.Digital.mat','UsedDigitalOutputChannels','DigitalOutputChannelNames')
     if gui
         disp('Loading saved output config files...')
          if ~isempty(UsedDigitalOutputChannels)
@@ -455,40 +454,40 @@ if gui
     set(ConfigureInputChannelButton,'Enable','on')
     set(ConfigureOutputChannelButton,'Enable','on')
     if verLessThan('matlab','8.3')
-        set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
+        set(Konsole,'String',strkat('kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
     else
         if exist('webcamlist')
             try 
                 webcamlist 
                 if isempty(webcamlist)
                     disp('No webcams detected.')
-                    set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
+                    set(Konsole,'String',strkat('kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
                 
                 else
                     cam=webcam(1);
-                    set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model,'\nWebcam detected: ',cam.Name))
+                    set(Konsole,'String',strkat('kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model,'\nWebcam detected: ',cam.Name))
                     set(WebcamMenu,'Enable','on')
                 end
             catch
                 disp('No webcams detected.')
-                set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
+                set(Konsole,'String',strkat('kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
             end
             
         else
             disp('No webcams detected.')
-            set(Konsole,'String',strkat('Kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
+            set(Konsole,'String',strkat('kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
         end
         
     end
     
     delete(wh);
     %close(wh)
-    set(scope_fig,'Visible','on')
+    set(handles.scope_fig,'Visible','on')
 end
 
-%% the following section applies only when Kontroller is run in non-interactive mode.
+%% the following section applies only when kontroller is run in non-interactive mode.
 if ~gui
-    disp('Kontroller is starting from the command line...')
+    disp('kontroller is starting from the command line...')
     for gi = 1:length(RunTheseParadigms)
         % prep the data acqusition session
         clear s
@@ -542,7 +541,7 @@ end
 %% clear scopes
     function [] = ClearScopes(~,~)
         % find handles of all subplots in the scope figure
-        temp=get(scope_fig,'Children');
+        temp=get(handles.scope_fig,'Children');
         temp2 = [];
         for i = 1:length(temp)
             if isempty(strfind(class(temp(i)),'Axes'))
@@ -559,7 +558,7 @@ end
 
 
 %% load saved data
-    function [] = LoadKontrollerData(~,~)
+    function [] = LoadkontrollerData(~,~)
         [FileName,PathName] = uigetfile('.mat');
         if ~FileName
             return
@@ -605,7 +604,7 @@ end
         ThisParadigm = find(ParadigmHandles == SelectedParadigm);
         
         % programmatically generate a menu with trials in this paradigm
-        temp = Kontroller_ntrials(data);
+        temp = kontroller_ntrials(data);
         nTrials = temp(ThisParadigm);
 
         TrialNames = {};
@@ -638,7 +637,7 @@ end
         sph = [];
         for i = 1:nrows
             for j = 1:ncols
-                figure(scope_fig)
+                figure(handles.scope_fig)
                 sph(c) = subplot(nrows,ncols,c); hold on
                 if c > length(get(PlotOutputs,'Value'))
                     % plot inputs
@@ -659,7 +658,7 @@ end
                 c = c+1;
                 if c > nplots
                     linkaxes(sph,'x');
-                    PrettyFig;
+                    prettyFig;
                     return
                 end
             end
@@ -678,8 +677,8 @@ end
         % load saved configs      
         n = nInputChannels;
         Height = 600;
-        f2 = figure('Position',[80 80 450 Height+50],'Toolbar','none','Menubar','none','resize','off','Name','Configure Analogue Input Channels','NumberTitle','off');
-        uicontrol(f2,'Position',[25 600 400 40],'style','text','String','To reduce channel cross-talk, label shorted channels as "Ground". These will not be recorded from.','FontSize',8);
+        handles.configure_input_channels_figure = figure('Position',[80 80 450 Height+50],'Toolbar','none','Menubar','none','resize','off','Name','Configure Analogue Input Channels','NumberTitle','off');
+        uicontrol(handles.configure_input_channels_figure,'Position',[25 600 400 40],'style','text','String','To reduce channel cross-talk, label shorted channels as "Ground". These will not be recorded from.','FontSize',8);
         a = axes; hold on
         set(a,'Visible','off');
         if floor(n/2)*2 == n
@@ -688,8 +687,8 @@ end
             % generate UIcontrol edit boxes
             for i = 1:n/2  % left side
                 if ismember(i,UsedInputChannels)
-                    li(i) = uicontrol(f2,'Position',[40 10+Height-i*nspacing 100 20],'Style', 'edit','String',InputChannelNames{i},'FontSize',12,'Callback',@InputConfigCallback);
-                    lir(i) = uicontrol(f2,'Position',[7 10+Height-i*nspacing 25 20],'Style', 'edit','String',mat2str(InputChannelRanges(i)),'FontSize',10,'Callback',@InputConfigCallback);
+                    li(i) = uicontrol(handles.configure_input_channels_figure,'Position',[40 10+Height-i*nspacing 100 20],'Style', 'edit','String',InputChannelNames{i},'FontSize',12,'Callback',@InputConfigCallback);
+                    lir(i) = uicontrol(handles.configure_input_channels_figure,'Position',[7 10+Height-i*nspacing 25 20],'Style', 'edit','String',mat2str(InputChannelRanges(i)),'FontSize',10,'Callback',@InputConfigCallback);
                     % check if it is a ground channel
                       if strmatch(get(li(i),'String'),'Ground')
                           set(li(i),'ForegroundColor','g')
@@ -697,16 +696,16 @@ end
                           set(li(i),'ForegroundColor','k')
                       end
                 else
-                    li(i) = uicontrol(f2,'Position',[40 10+Height-i*nspacing 100 20],'Style', 'edit','FontSize',12,'Callback',@InputConfigCallback);
-                    lir(i) = uicontrol(f2,'Position',[7 10+Height-i*nspacing 25 20],'Style', 'edit','String',mat2str(InputChannelRanges(i)),'FontSize',10,'Callback',@InputConfigCallback);
+                    li(i) = uicontrol(handles.configure_input_channels_figure,'Position',[40 10+Height-i*nspacing 100 20],'Style', 'edit','FontSize',12,'Callback',@InputConfigCallback);
+                    lir(i) = uicontrol(handles.configure_input_channels_figure,'Position',[7 10+Height-i*nspacing 25 20],'Style', 'edit','String',mat2str(InputChannelRanges(i)),'FontSize',10,'Callback',@InputConfigCallback);
                 end
-                uicontrol(f2,'Position',[160 10+Height-i*nspacing 50 20],'Style', 'text','String',InputChannels{i},'FontSize',12);
+                uicontrol(handles.configure_input_channels_figure,'Position',[160 10+Height-i*nspacing 50 20],'Style', 'text','String',InputChannels{i},'FontSize',12);
             end
             clear i
             for i = 1:n/2  % right side
                 if ismember(n/2+i,UsedInputChannels)
-                    ri(i) = uicontrol(f2,'Position',[300 10+Height-i*nspacing 100 20],'Style', 'edit','String',InputChannelNames{n/2+i},'FontSize',12,'Callback',@InputConfigCallback);
-                    rir(i) = uicontrol(f2,'Position',[407 10+Height-i*nspacing 25 20],'Style', 'edit','String',mat2str(InputChannelRanges(n/2+i)),'FontSize',10,'Callback',@InputConfigCallback);
+                    ri(i) = uicontrol(handles.configure_input_channels_figure,'Position',[300 10+Height-i*nspacing 100 20],'Style', 'edit','String',InputChannelNames{n/2+i},'FontSize',12,'Callback',@InputConfigCallback);
+                    rir(i) = uicontrol(handles.configure_input_channels_figure,'Position',[407 10+Height-i*nspacing 25 20],'Style', 'edit','String',mat2str(InputChannelRanges(n/2+i)),'FontSize',10,'Callback',@InputConfigCallback);
                     % check if it is a ground channel
                       if strmatch(get(ri(i),'String'),'Ground')
                           set(ri(i),'ForegroundColor','g')
@@ -714,15 +713,15 @@ end
                           set(ri(i),'ForegroundColor','k')
                       end
                 else
-                    ri(i) = uicontrol(f2,'Position',[300 10+Height-i*nspacing 100 20],'Style', 'edit','FontSize',12,'Callback',@InputConfigCallback);
-                    rir(i) = uicontrol(f2,'Position',[407 10+Height-i*nspacing 25 20],'Style', 'edit','String',mat2str(InputChannelRanges(n/2+i)),'FontSize',10,'Callback',@InputConfigCallback);
+                    ri(i) = uicontrol(handles.configure_input_channels_figure,'Position',[300 10+Height-i*nspacing 100 20],'Style', 'edit','FontSize',12,'Callback',@InputConfigCallback);
+                    rir(i) = uicontrol(handles.configure_input_channels_figure,'Position',[407 10+Height-i*nspacing 25 20],'Style', 'edit','String',mat2str(InputChannelRanges(n/2+i)),'FontSize',10,'Callback',@InputConfigCallback);
                 end
-                uicontrol(f2,'Position',[220 10+Height-i*nspacing 50 20],'Style', 'text','String',InputChannels{n/2+i},'FontSize',12);
+                uicontrol(handles.configure_input_channels_figure,'Position',[220 10+Height-i*nspacing 50 20],'Style', 'text','String',InputChannels{n/2+i},'FontSize',12);
             end
             clear i
             
         else
-            error('Kontroller error 676: Odd number of channels, cannot handle this')
+            error('kontroller error 676: Odd number of channels, cannot handle this')
         end
     
     end
@@ -755,7 +754,7 @@ end
         % make the analogue outputs
         n = nOutputChannels;
         Height = 300;
-        f3 = figure('Position',[50 150 450 Height],'Toolbar','none','Menubar','none','Name','Configure Analogue Output Channels','NumberTitle','off','CloseRequestFcn',@QuitConfigOutputsCallback);
+        handles.configure_output_channels_figure = figure('Position',[50 150 450 Height],'Toolbar','none','Menubar','none','Name','Configure Analogue Output Channels','NumberTitle','off','CloseRequestFcn',@QuitConfigOutputsCallback);
         a = axes; hold on
         set(a,'Visible','off');
         if floor(n/2)*2 == n
@@ -764,21 +763,21 @@ end
             % generate UIcontrol edit boxes
             for i = 1:n/2  % left side
                 if ismember(i,UsedOutputChannels)
-                    lo(i) = uicontrol(f3,'Position',[40 Height-i*nspacing 100 20],'Style', 'edit','String',OutputChannelNames{i},'FontSize',12,'Callback',@OutputConfigCallback);
+                    lo(i) = uicontrol(handles.configure_output_channels_figure,'Position',[40 Height-i*nspacing 100 20],'Style', 'edit','String',OutputChannelNames{i},'FontSize',12,'Callback',@OutputConfigCallback);
                 else
-                    lo(i) = uicontrol(f3,'Position',[40 Height-i*nspacing 100 20],'Style', 'edit','FontSize',12,'Callback',@OutputConfigCallback);
+                    lo(i) = uicontrol(handles.configure_output_channels_figure,'Position',[40 Height-i*nspacing 100 20],'Style', 'edit','FontSize',12,'Callback',@OutputConfigCallback);
                 end
-                uicontrol(f3,'Position',[160 Height-i*nspacing 50 20],'Style', 'text','String',OutputChannels{i},'FontSize',12);
+                uicontrol(handles.configure_output_channels_figure,'Position',[160 Height-i*nspacing 50 20],'Style', 'text','String',OutputChannels{i},'FontSize',12);
             end
             clear i
             for i = 1:n/2  % right side
                 if ismember(n/2+i,UsedOutputChannels)
                     
-                    ro(i) = uicontrol(f3,'Position',[300 Height-i*nspacing 100 20],'Style', 'edit','String',OutputChannelNames{n/2+i},'FontSize',12,'Callback',@OutputConfigCallback);
+                    ro(i) = uicontrol(handles.configure_output_channels_figure,'Position',[300 Height-i*nspacing 100 20],'Style', 'edit','String',OutputChannelNames{n/2+i},'FontSize',12,'Callback',@OutputConfigCallback);
                 else
-                    ro(i) = uicontrol(f3,'Position',[300 Height-i*nspacing 100 20],'Style', 'edit','FontSize',12,'Callback',@OutputConfigCallback);
+                    ro(i) = uicontrol(handles.configure_output_channels_figure,'Position',[300 Height-i*nspacing 100 20],'Style', 'edit','FontSize',12,'Callback',@OutputConfigCallback);
                 end
-                uicontrol(f3,'Position',[220 Height-i*nspacing 50 20],'Style', 'text','String',OutputChannels{n/2+i},'FontSize',12);
+                uicontrol(handles.configure_output_channels_figure,'Position',[220 Height-i*nspacing 50 20],'Style', 'text','String',OutputChannels{n/2+i},'FontSize',12);
             end
             clear i
             
@@ -789,7 +788,7 @@ end
         % make the digital outputs
         n = nDigitalOutputChannels;
         Height = 700;
-        f4 = figure('Position',[550 150 550 Height],'Resize','off','Toolbar','none','Menubar','none','Name','Configure Digital Output Channels','NumberTitle','off','CloseRequestFcn',@QuitConfigOutputsCallback);
+        handles.configure_digital_output_channels_figure = figure('Position',[550 150 550 Height],'Resize','off','Toolbar','none','Menubar','none','Name','Configure Digital Output Channels','NumberTitle','off','CloseRequestFcn',@QuitConfigOutputsCallback);
         a = axes; hold on
         set(a,'Visible','off');
         if floor(n/2)*2 == n
@@ -798,21 +797,21 @@ end
             % generate UIcontrol edit boxes
             for i = 1:n/2  % left side
                 if ismember(i,UsedDigitalOutputChannels)
-                    dlo(i) = uicontrol(f4,'Position',[40 Height-i*nspacing 100 20],'Style', 'edit','String',DigitalOutputChannelNames{i},'FontSize',10,'Callback',@OutputConfigCallback);
+                    dlo(i) = uicontrol(handles.configure_digital_output_channels_figure,'Position',[40 Height-i*nspacing 100 20],'Style', 'edit','String',DigitalOutputChannelNames{i},'FontSize',10,'Callback',@OutputConfigCallback);
                 else
-                    dlo(i) = uicontrol(f4,'Position',[40 Height-i*nspacing 100 20],'Style', 'edit','FontSize',10,'Callback',@OutputConfigCallback);
+                    dlo(i) = uicontrol(handles.configure_digital_output_channels_figure,'Position',[40 Height-i*nspacing 100 20],'Style', 'edit','FontSize',10,'Callback',@OutputConfigCallback);
                 end
-                uicontrol(f4,'Position',[160 Height-i*nspacing 100 20],'Style', 'text','String',DigitalOutputChannels{i},'FontSize',10);
+                uicontrol(handles.configure_digital_output_channels_figure,'Position',[160 Height-i*nspacing 100 20],'Style', 'text','String',DigitalOutputChannels{i},'FontSize',10);
             end
             clear i
             for i = 1:n/2  % right side
                 if ismember(n/2+i,UsedOutputChannels)
                     
-                    dro(i) = uicontrol(f4,'Position',[390 Height-i*nspacing 100 20],'Style', 'edit','String',DigitalOutputChannelNames{n/2+i},'FontSize',10,'Callback',@OutputConfigCallback);
+                    dro(i) = uicontrol(handles.configure_digital_output_channels_figure,'Position',[390 Height-i*nspacing 100 20],'Style', 'edit','String',DigitalOutputChannelNames{n/2+i},'FontSize',10,'Callback',@OutputConfigCallback);
                 else
-                    dro(i) = uicontrol(f4,'Position',[390 Height-i*nspacing 100 20],'Style', 'edit','FontSize',10,'Callback',@OutputConfigCallback);
+                    dro(i) = uicontrol(handles.configure_digital_output_channels_figure,'Position',[390 Height-i*nspacing 100 20],'Style', 'edit','FontSize',10,'Callback',@OutputConfigCallback);
                 end
-                uicontrol(f4,'Position',[280 Height-i*nspacing 100 20],'Style', 'text','String',DigitalOutputChannels{n/2+i},'FontSize',10);
+                uicontrol(handles.configure_digital_output_channels_figure,'Position',[280 Height-i*nspacing 100 20],'Style', 'text','String',DigitalOutputChannels{n/2+i},'FontSize',10);
             end
             clear i
             
@@ -827,7 +826,7 @@ function [] =ManualControlCallback(~,~)
         % make UI for analogue outputss
         n = nOutputChannels;
         Height = 300;
-        fMC = figure('Position',[60 50 650 Height],'Toolbar','none','Menubar','none','Name','Manual Control','NumberTitle','off','CloseRequestFcn',@QuitManualControlCallback);
+        handles.manual_control_figure = figure('Position',[60 50 650 Height],'Toolbar','none','Menubar','none','Name','Manual Control','NumberTitle','off','CloseRequestFcn',@QuitManualControlCallback);
         a = axes; hold on
         set(a,'Visible','off');
         if floor(n/2)*2 == n
@@ -837,28 +836,28 @@ function [] =ManualControlCallback(~,~)
             oi=1; % this is the index of each used ouput channel
             for i = 1:n/2  % left side
                 if ismember(i,UsedOutputChannels)
-                    MCoi(oi) = uicontrol(fMC,'Position',[90 Height-i*nspacing 100 20],'Style', 'slider','Min',0,'Max',5,'Value',0,'String',OutputChannelNames{i},'FontSize',16,'Callback',@ManualControlSliderCallback);
+                    MCoi(oi) = uicontrol(handles.manual_control_figure,'Position',[90 Height-i*nspacing 100 20],'Style', 'slider','Min',0,'Max',5,'Value',0,'String',OutputChannelNames{i},'FontSize',16,'Callback',@ManualControlSliderCallback);
                     try    % R2013b and older
                        addlistener(MCoi(oi),'ActionEvent',@ManualControlSliderCallback);
                     catch  % R2014a and newer
                        addlistener(MCoi(oi),'ContinuousValueChange',@ManualControlSliderCallback);
                     end
-                    uicontrol(fMC,'Position',[220 Height-i*nspacing 50 20],'Style', 'text','String',OutputChannels{i},'FontSize',12);
-                    MCNumoi(oi) = uicontrol(fMC,'Position',[20 Height-i*nspacing 60 20],'Style', 'edit','String','0','FontSize',12,'Callback',@ManualControlSliderCallback);
+                    uicontrol(handles.manual_control_figure,'Position',[220 Height-i*nspacing 50 20],'Style', 'text','String',OutputChannels{i},'FontSize',12);
+                    MCNumoi(oi) = uicontrol(handles.manual_control_figure,'Position',[20 Height-i*nspacing 60 20],'Style', 'edit','String','0','FontSize',12,'Callback',@ManualControlSliderCallback);
                     oi = oi +1; 
                 end
             end
             clear i
             for i = 1:n/2  % right side  
                 if ismember(i+n/2,UsedOutputChannels)
-                    MCoi(oi) = uicontrol(fMC,'Position',[390 Height-i*nspacing 100 20],'Style', 'slider','Min',0,'Max',5,'Value',0,'String',OutputChannelNames{n/2+i},'FontSize',16,'Callback',@ManualControlSliderCallback);
+                    MCoi(oi) = uicontrol(handles.manual_control_figure,'Position',[390 Height-i*nspacing 100 20],'Style', 'slider','Min',0,'Max',5,'Value',0,'String',OutputChannelNames{n/2+i},'FontSize',16,'Callback',@ManualControlSliderCallback);
                     try    % R2013b and older
                        addlistener(MCoi(oi),'ActionEvent',@ManualControlSliderCallback);
                     catch  % R2014a and newer
                        addlistener(MCoi(oi),'ContinuousValueChange',@ManualControlSliderCallback);
                     end
-                    uicontrol(fMC,'Position',[320 Height-i*nspacing 50 20],'Style', 'text','String',OutputChannels{(n/2+i)},'FontSize',12);
-                    MCNumoi(oi) = uicontrol(fMC,'Position',[520 Height-i*nspacing 60 20],'Style', 'edit','String','0','FontSize',12,'Callback',@ManualControlSliderCallback);
+                    uicontrol(handles.manual_control_figure,'Position',[320 Height-i*nspacing 50 20],'Style', 'text','String',OutputChannels{(n/2+i)},'FontSize',12);
+                    MCNumoi(oi) = uicontrol(handles.manual_control_figure,'Position',[520 Height-i*nspacing 60 20],'Style', 'edit','String','0','FontSize',12,'Callback',@ManualControlSliderCallback);
                     oi = oi +1;
                 end
             end
@@ -903,7 +902,7 @@ function [] =ManualControlCallback(~,~)
             end
             
             % start scopes
-            figure(scope_fig)   
+            figure(handles.scope_fig)   
             % create session
             clear s
             s = daq.createSession('ni');
@@ -915,16 +914,16 @@ function [] =ManualControlCallback(~,~)
             % update scope_plot_data
             scope_plot_data = NaN(length(get(PlotInputs,'Value')),5*w); % 5 s of  data in each channel
             time = (1/w):(1/w):5;
-            ScopeHandles = []; % axis handles for each sub plot in scope
+            handles.scope_handles = []; % axis handles for each sub plot in scope
             rows = ceil(length(get(PlotInputs,'Value'))/2);
             ScopeThese = get(PlotInputs,'Value');
-            PlotHandles = [];
+            handles.plot_handles = [];
             for k = 1:length(get(PlotInputs,'Value'))
-                ScopeHandles(k) = subplot(2,rows,k);
+                handles.scope_handles(k) = subplot(2,rows,k);
                 
-                PlotHandles(k) = plot(ScopeHandles(k),NaN,NaN);
-                set(ScopeHandles(k),'ButtonDownFcn',@ToggleFilterState);
-                %set(ScopeHandles(k),'XLim',[0 5*w],'YLim',[0 5])
+                handles.plot_handles(k) = plot(handles.scope_handles(k),NaN,NaN);
+                set(handles.scope_handles(k),'ButtonDownFcn',@ToggleFilterState);
+                %set(handles.scope_handles(k),'XLim',[0 5*w],'YLim',[0 5])
                 ylabel( strcat(InputChannels{UsedInputChannels(ScopeThese(k))},' -- ',InputChannelNames{UsedInputChannels(ScopeThese(k))}))
                 s.addAnalogInputChannel(DeviceName,InputChannels{UsedInputChannels(ScopeThese(k))}, 'Voltage'); % add channel
             end
@@ -1091,7 +1090,7 @@ end
              set(StartScopes,'Enable','off')
          end
          % save Input Channel Names for persisitent config
-         save('Kontroller.Config.Input.mat','InputChannelNames','UsedInputChannels','InputChannelRanges');
+         save('kontroller.Config.Input.mat','InputChannelNames','UsedInputChannels','InputChannelRanges');
         
     end
 
@@ -1161,10 +1160,10 @@ function [] = OutputConfigCallback(~,~)
          set(PlotOutputs,'String',PlotOutputsList)
          % save Analogue Output Channel Names for persisitent config
          
-         save('Kontroller.Config.Output.mat','OutputChannelNames','UsedOutputChannels');
+         save('kontroller.Config.Output.mat','OutputChannelNames','UsedOutputChannels');
          
          % save Digital Output Channel Names for persisitent config
-         save('Kontroller.Config.Output.Digital.mat','DigitalOutputChannelNames','UsedDigitalOutputChannels');
+         save('kontroller.Config.Output.Digital.mat','DigitalOutputChannelNames','UsedDigitalOutputChannels');
         
 end
 
@@ -1172,7 +1171,7 @@ end
     function [] = SamplingRateCallback(~,~)
         w = str2double(get(SamplingRateControl,'String'));
         % write to file
-        save('Kontroller.SamplingRate.mat','w')
+        save('kontroller.SamplingRate.mat','w')
     end
 
 
@@ -1189,7 +1188,7 @@ end
                 scopes_running = 0;
             else
                 % start scopes
-                figure(scope_fig)   
+                figure(handles.scope_fig)   
                 % create session
                 s = daq.createSession('ni');
                 s.IsContinuous = true;
@@ -1197,14 +1196,14 @@ end
                 % update scope_plot_data
                 scope_plot_data = NaN(length(get(PlotInputs,'Value')),5*w); % 5 s of  data in each channel
                 time = (1/w):(1/w):5;
-                ScopeHandles = []; % axis handles for each sub plot in scope
+                handles.scope_handles = []; % axis handles for each sub plot in scope
                 rows = ceil(length(get(PlotInputs,'Value'))/2);
                 ScopeThese = get(PlotInputs,'Value');
 
                 for i = 1:length(get(PlotInputs,'Value'))
-                    ScopeHandles(i) = subplot(2,rows,i);
-                    PlotHandles(i) = plot(ScopeHandles(i),NaN,NaN);
-                    set(ScopeHandles(i),'ButtonDownFcn',@ToggleFilterState);
+                    handles.scope_handles(i) = subplot(2,rows,i);
+                    handles.plot_handles(i) = plot(handles.scope_handles(i),NaN,NaN);
+                    set(handles.scope_handles(i),'ButtonDownFcn',@ToggleFilterState);
                                
                     ylabel( strcat(InputChannels{UsedInputChannels(ScopeThese(i))},' -- ',InputChannelNames{UsedInputChannels(ScopeThese(i))}))
                     s.addAnalogInputChannel(DeviceName,InputChannels{UsedInputChannels(ScopeThese(i))}, 'Voltage'); % add channel
@@ -1242,10 +1241,10 @@ end
 %% toggle filter state
     function [] = ToggleFilterState(src,~)
 
-        if FilterState(ScopeHandles == src)
-            FilterState(ScopeHandles == src) = 0;
+        if FilterState(handles.scope_handles == src)
+            FilterState(handles.scope_handles == src) = 0;
         else
-            FilterState(ScopeHandles == src) = 1;
+            FilterState(handles.scope_handles == src) = 1;
         end
     end
 
@@ -1267,9 +1266,9 @@ end
             if FilterState(si)
                 % filter the data
                 filtered_trace = filter_trace(scope_plot_data(si,:));
-                set(PlotHandles(si),'XData',time,'YData',filtered_trace,'Color',[1 0 0]);
+                set(handles.plot_handles(si),'XData',time,'YData',filtered_trace,'Color',[1 0 0]);
             else
-                set(PlotHandles(si),'XData',time,'YData',scope_plot_data(si,:),'Color',[0 0 1]);
+                set(handles.plot_handles(si),'XData',time,'YData',scope_plot_data(si,:),'Color',[0 0 1]);
             end
             
         end
@@ -1293,7 +1292,7 @@ end
             % crash
             plot_length = str2double(get(plot_only_control,'String'));
 
-            EpochPlot(ScopeHandles(ScopeThese),ScopeThese,time,scope_plot_data,FilterState,PlotHandles(ScopeThese),plot_length);
+            EpochPlot(handles.scope_handles(ScopeThese),ScopeThese,time,scope_plot_data,FilterState,handles.plot_handles(ScopeThese),plot_length);
 
             trial_running = trial_running - 1;
         else
@@ -1321,7 +1320,7 @@ end
         var(badvar) = []; clear badvar
         
         % make the gui
-        fcs= figure('Position',[200 200 450 Height],'Toolbar','none','Menubar','none','Name','Select Control Signals','NumberTitle','off','Resize','off');
+        handles.configure_control_signals_figure = figure('Position',[200 200 450 Height],'Toolbar','none','Menubar','none','Name','Select Control Signals','NumberTitle','off','Resize','off');
         ControlHandles = [];
         if length(var) >= no
             % assemble names into a cell array
@@ -1332,36 +1331,36 @@ end
             
             
             % get name of control paradigm
-            ParadigmNameUI=uicontrol(fcs,'Position',[(450-340)/2 Height-30 340 24],'Style', 'edit','String','Enter Name of Control Paradigm','FontSize',12);
+            ParadigmNameUI=uicontrol(handles.configure_control_signals_figure,'Position',[(450-340)/2 Height-30 340 24],'Style', 'edit','String','Enter Name of Control Paradigm','FontSize',12);
             
             
             for i = 1:length(UsedOutputChannels)
-                ControlHandles(i) = uicontrol(fcs,'Position',[150 10+i*100 150 50],'Style','popupmenu','Enable','on','String',VarNames,'FontSize',12);
-                uicontrol(fcs,'Position',[30 30+i*100 100 30],'Style','text','String',OutputChannels{UsedOutputChannels(i)},'FontSize',12);
-                uicontrol(fcs,'Position',[320 30+i*100 100 30],'Style','text','String',OutputChannelNames{UsedOutputChannels(i)},'FontSize',12);
+                ControlHandles(i) = uicontrol(handles.configure_control_signals_figure,'Position',[150 10+i*100 150 50],'Style','popupmenu','Enable','on','String',VarNames,'FontSize',12);
+                uicontrol(handles.configure_control_signals_figure,'Position',[30 30+i*100 100 30],'Style','text','String',OutputChannels{UsedOutputChannels(i)},'FontSize',12);
+                uicontrol(handles.configure_control_signals_figure,'Position',[320 30+i*100 100 30],'Style','text','String',OutputChannelNames{UsedOutputChannels(i)},'FontSize',12);
 
             end
             clear i
             ti=1;
             for i = length(UsedOutputChannels)+1:no
-                ControlHandles(i) = uicontrol(fcs,'Position',[150 10+i*100 150 50],'Style','popupmenu','Enable','on','String',VarNames,'FontSize',12);
-                uicontrol(fcs,'Position',[30 30+i*100 100 30],'Style','text','String',DigitalOutputChannels{UsedDigitalOutputChannels(ti)},'FontSize',12);
-                uicontrol(fcs,'Position',[320 30+i*100 100 30],'Style','text','String',DigitalOutputChannelNames{UsedDigitalOutputChannels(ti)},'FontSize',12);
+                ControlHandles(i) = uicontrol(handles.configure_control_signals_figure,'Position',[150 10+i*100 150 50],'Style','popupmenu','Enable','on','String',VarNames,'FontSize',12);
+                uicontrol(handles.configure_control_signals_figure,'Position',[30 30+i*100 100 30],'Style','text','String',DigitalOutputChannels{UsedDigitalOutputChannels(ti)},'FontSize',12);
+                uicontrol(handles.configure_control_signals_figure,'Position',[320 30+i*100 100 30],'Style','text','String',DigitalOutputChannelNames{UsedDigitalOutputChannels(ti)},'FontSize',12);
                 ti=ti+1;
             end
             
             clear ti
             % button to save paradigm
-            uicontrol(fcs,'Position',[370 30 60 30],'Style','pushbutton','String','+Add','FontSize',12,'Callback',@ConfigureControlCallback);
+            uicontrol(handles.configure_control_signals_figure,'Position',[370 30 60 30],'Style','pushbutton','String','+Add','FontSize',12,'Callback',@ConfigureControlCallback);
 
         else
             % tell the user they don't enough variables to configure controls
-            uicontrol(fcs,'Position',[25 70 400 200],'Style','text','String','To manually configure a control paradigm, you must have at least as many vectors in your MATLAB workspace as you have analogue outputs. This is not the case. Either close this and create some, or load a previously saved control paradigm from file. ','FontSize',12);
+            uicontrol(handles.configure_control_signals_figure,'Position',[25 70 400 200],'Style','text','String','To manually configure a control paradigm, you must have at least as many vectors in your MATLAB workspace as you have analogue outputs. This is not the case. Either close this and create some, or load a previously saved control paradigm from file. ','FontSize',12);
         
         end
         
         % button for loading saved control paradigms
-        uicontrol(fcs,'Position',[10 30 260 30],'Style','pushbutton','String','Load saved paradigms...','FontSize',12,'Callback',@LoadSavedParadigms);
+        uicontrol(handles.configure_control_signals_figure,'Position',[10 30 260 30],'Style','pushbutton','String','Load saved paradigms...','FontSize',12,'Callback',@LoadSavedParadigms);
         
         
         
@@ -1654,7 +1653,7 @@ end
     function [] = ViewControlParadigm(~,~)
         % try to close previous figure
         try 
-            close(ViewParadigmFig)
+            close(handles.view_paradigm_figure)
         catch
         end
 
@@ -1665,7 +1664,7 @@ end
         nrows = floor(sqrt(no));
         ncols = ceil(no/nrows);
         
-        ViewParadigmFig = figure('Position',[500 150 750 650],'Name','Control Signals','NumberTitle','off','Resize','on'); hold on; 
+        handles.view_paradigm_figure = figure('Position',[500 150 750 650],'Name','Control Signals','NumberTitle','off','Resize','on'); hold on; 
         hold on
         sr = str2double(get(SamplingRateControl,'String'));
         t  = (1:length(ControlParadigm(get(ParadigmListDisplay,'Value')).Outputs))/sr;
@@ -1676,7 +1675,7 @@ end
             set(gca,'XLim',[0 max(t)])
             title(ocn{vi},'FontSize',20,'Interpreter','none')
         end
-        PrettyFig('EqualiseY =1;','fs=18;')
+        prettyFig('EqualiseY =1;','fs=18;')
         
     end
 
@@ -1760,21 +1759,21 @@ end
         s.Rate = w; % sampling rate, user defined.
          
         % show the traces as we acquire them on the scope
-        figure(scope_fig)
+        figure(handles.scope_fig)
         
         % update scope_plot_data
-        ScopeHandles = []; % axis handles for each sub plot in scope
+        handles.scope_handles = []; % axis handles for each sub plot in scope
         rows = ceil(length(get(PlotInputs,'Value'))/2);
         ScopeThese = get(PlotInputs,'Value');
         scope_plot_data = NaN(length(UsedInputChannels),T*w);
         
         ti = 1;
         for i = ScopeThese
-            ScopeHandles(i) = subplot(2,rows,ti); ti = ti+1;
-            set(ScopeHandles(i),'ButtonDownFcn',@ToggleFilterState);
-            cla(ScopeHandles(i));
-            PlotHandles(i) = plot(NaN,NaN,'k');
-            set(ScopeHandles(i),'XLim',[0 T])
+            handles.scope_handles(i) = subplot(2,rows,ti); ti = ti+1;
+            set(handles.scope_handles(i),'ButtonDownFcn',@ToggleFilterState);
+            cla(handles.scope_handles(i));
+            handles.plot_handles(i) = plot(NaN,NaN,'k');
+            set(handles.scope_handles(i),'XLim',[0 T])
             plotname=strcat(InputChannels{UsedInputChannels(i)},'-',InputChannelNames{UsedInputChannels(i)});
             plotname = strrep(plotname,'_','-');
             title(plotname)
@@ -1837,7 +1836,7 @@ end
             close all
             disp('The error MATLAB reported was:')
             disp(err.message);
-            errordlg('Kontroller could not start the task. This is probably because the hardware is reserved. You need to restart Kontroller. Sorry about that. Type "return" and hit enter to restart.')
+            errordlg('kontroller could not start the task. This is probably because the hardware is reserved. You need to restart kontroller. Sorry about that. Type "return" and hit enter to restart.')
             clear all
             keyboard
         end
@@ -1966,14 +1965,14 @@ end
 
 %% save control paradigms
     function [] = SaveControlParadigms(~,~)
-        temp=strcat(datestr(now,'yyyy_mm_dd'),'_Kontroller_paradigm_.mat');
+        temp=strcat(datestr(now,'yyyy_mm_dd'),'_kontroller_paradigm_.mat');
         ControlParadigmSaveToFile=uiputfile(temp);
         save(ControlParadigmSaveToFile,'ControlParadigm');
     end
 
 %% load saved control paradigms
     function [] = LoadSavedParadigms(~,~)
-        [FileName,PathName] = uigetfile('*_Kontroller_paradigm*');
+        [FileName,PathName] = uigetfile('*_kontroller_paradigm*');
         temp=load(strcat(PathName,FileName));
 
         % check that this Control PAradigm has the same number of outputs as there are output channels
@@ -1983,7 +1982,7 @@ end
         else
             % ouch
             
-            errordlg('Error: The Paradigm you tried to load doesnt have the same number of outputs as the number of outputs currently configured. Either load a new Control Paradigm, or change the number of OutputChannels to match this paradigm.','Kontroller cannot do this.')
+            errordlg('Error: The Paradigm you tried to load doesnt have the same number of outputs as the number of outputs currently configured. Either load a new Control Paradigm, or change the number of OutputChannels to match this paradigm.','kontroller cannot do this.')
             return
         end 
 
@@ -2006,19 +2005,19 @@ end
         else
             set(RunTrialButton,'enable','on','String','RUN and SAVE','BackgroundColor',[0.1 0.9 0.1]);
         end
-        delete(fcs)
+        delete(handles.configure_control_signals_figure)
         
         % show the name
-        set(ParadigmNameDisplay,'String',strrep(FileName,'_Kontroller_Paradigm.mat',''))
+        set(ParadigmNameDisplay,'String',strrep(FileName,'_kontroller_Paradigm.mat',''))
     end
 
 %% metadata callback
     function [] = MetadataCallback(~,~)
         % open the editor
-        mef = figure('Position',[60 50 450 400],'Toolbar','none','Menubar','none','Name','Metadata Editor','NumberTitle','off','Resize','off');
-        uicontrol(mef,'Style','Text','String','Add or modify metadata using standard MATLAB syntax, one variable at a time, below:','Position',[5 340 440 50],'HorizontalAlignment','left')
-        % MetadataTextControl = uicontrol(mef,'Style', 'edit', 'String','','Position',[5 285 440 40],'HorizontalAlignment','left','Callback',@AddMetadata);
-        MetadataTextDisplay = uicontrol(mef,'Style','Text','String',metadatatext,'Position',[25 5 400 220]);
+        handles.metadata_editor_figure = figure('Position',[60 50 450 400],'Toolbar','none','Menubar','none','Name','Metadata Editor','NumberTitle','off','Resize','off');
+        uicontrol(handles.metadata_editor_figure,'Style','Text','String','Add or modify metadata using standard MATLAB syntax, one variable at a time, below:','Position',[5 340 440 50],'HorizontalAlignment','left')
+        % MetadataTextControl = uicontrol(handles.metadata_editor_figure,'Style', 'edit', 'String','','Position',[5 285 440 40],'HorizontalAlignment','left','Callback',@AddMetadata);
+        MetadataTextDisplay = uicontrol(handles.metadata_editor_figure,'Style','Text','String',metadatatext,'Position',[25 5 400 220]);
 
         % configure autocomplete
         autocompletionList = cache('autocompletionList');
@@ -2088,46 +2087,17 @@ end
         
     end
 
-%% clean up when quitting Kontroller
-    function [] = QuitKontrollerCallback(~,~)
-       selection = questdlg('Are you sure you want to quit Kontroller?','Confirm quit.','Yes','No','Yes'); 
+%% clean up when quitting kontroller
+    function [] = QuitkontrollerCallback(~,~)
+       selection = questdlg('Are you sure you want to quit kontroller?','Confirm quit.','Yes','No','Yes'); 
        switch selection, 
           case 'Yes',
-              try
-                delete(scope_fig)
-              catch
-              end
-              try
-                delete(mef)
-              catch
-              end
-              try
-                   delete(f1);
-              catch
-              end
-              try
-                    delete(f2);
-              catch
-              end
-              try
-                    delete(f3);
-              catch
-              end
-              try
-                    delete(f4);
-              catch
-              end
-              try
-                    delete(mef);
-              catch
-              end
-              try
-                    delete(ViewParadigmFig);
-              catch
-              end
-              try
-                    delete(fcs);
-              catch
+              fn = fieldnames(handles);
+              for i = 1:length(fn)
+                try
+                    eval(['delete(handles.' fn{i} ')'])
+                catch
+                end
               end
           case 'No'
           return 
@@ -2152,7 +2122,7 @@ end
         end
         
         try
-            delete(fMC)
+            delete(handles.manual_control_figure)
         catch
         end
         
@@ -2171,10 +2141,10 @@ end
     function  [] = QuitConfigOutputsCallback(~,~)
         % close both windows together
         try
-            delete(f3);
+            delete(handles.configure_output_channels_figure);
         end
         try
-            delete(f4);
+            delete(handles.configure_digital_output_channels_figure);
         end
     end
 
