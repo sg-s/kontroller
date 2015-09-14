@@ -1265,7 +1265,7 @@ end
         for si = ScopeThese
             if FilterState(si)
                 % filter the data
-                filtered_trace = bandPass(scope_plot_data(si,:));
+                filtered_trace = bandPass(scope_plot_data(si,:),100,10);
                 set(handles.plot_handles(si),'XData',time,'YData',filtered_trace,'Color',[1 0 0]);
             else
                 set(handles.plot_handles(si),'XData',time,'YData',scope_plot_data(si,:),'Color',[0 0 1]);
