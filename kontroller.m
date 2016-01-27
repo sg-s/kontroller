@@ -112,7 +112,7 @@ clear j
 
 
 % check for internal dependencies
-dependencies = {'oval','strkat','prettyFig','checkForNewestVersionOnGitHub'};
+dependencies = {'oval','prettyFig','checkForNewestVersionOnGitHub'};
 for ii = 1:length(dependencies)
     if exist(dependencies{ii}) ~= 2
         error('kontroller is missing an external function that it needs to run. You can download it <a href="https://github.com/sg-s/srinivas.gs_mtools">here.</a>')
@@ -375,8 +375,7 @@ OutputChannelNames = {}; % this is the user defined names
 FilterState = zeros(100,1);
 
 if gui
-    wh.ProgressRatio  =0.7;
-    % waitbar(0.7,wh,'Checking for input config...'); figure(wh)
+    wh.ProgressRatio = 0.7;
 end
 % load saved configs...inputs
 if ~isempty(dir('kontroller.Config.Input.mat'))
@@ -410,7 +409,6 @@ end
 
 if gui
     wh.ProgressRatio  =0.8;
-    % waitbar(0.8,wh,'Checking for output config...'); figure(wh)
 end
 % load saved configs..outputs
 if gui
@@ -448,40 +446,38 @@ if ~isempty(dir('kontroller.Config.Output.Digital.mat'))
     
 end
 if gui
-    wh.ProgressRatio  =0.9;
-    % waitbar(0.9,wh,'Looking for webcams...'); figure(wh)
+    wh.ProgressRatio = 0.9;
 
     set(ConfigureInputChannelButton,'Enable','on')
     set(ConfigureOutputChannelButton,'Enable','on')
     if verLessThan('matlab','8.3')
-        set(Konsole,'String',strkat('kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
+        set(Konsole,'String',['kontroller is ready to use.' char(10) 'DAQ detected: ' char(10) d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model])
     else
         if exist('webcamlist')
             try 
                 webcamlist 
                 if isempty(webcamlist)
                     disp('No webcams detected.')
-                    set(Konsole,'String',strkat('kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
+                    set(Konsole,'String',['kontroller is ready to use.' char(10) 'DAQ detected:' char(10) d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model])
                 
                 else
                     cam=webcam(1);
-                    set(Konsole,'String',strkat('kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model,'\nWebcam detected: ',cam.Name))
+                    set(Konsole,'String',['kontroller is ready to use.' char(10) 'DAQ detected:' char(10) d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model  char(10) 'Webcam detected:' cam.Name])
                     set(WebcamMenu,'Enable','on')
                 end
             catch
                 disp('No webcams detected.')
-                set(Konsole,'String',strkat('kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
+                set(Konsole,'String',['kontroller is ready to use.' char(10) 'DAQ detected:' char(10) d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model])
             end
             
         else
             disp('No webcams detected.')
-            set(Konsole,'String',strkat('kontroller is ready to use. \n','DAQ detected: \n',d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model))
+            set(Konsole,'String',['kontroller is ready to use.' char(10) 'DAQ detected:' char(10) d(UseThisDevice).Vendor.FullName,'-',d(UseThisDevice).Model])
         end
         
     end
     
     delete(wh);
-    %close(wh)
     set(handles.scope_fig,'Visible','on')
 end
 
@@ -609,7 +605,7 @@ end
 
         TrialNames = {};
         for i = 1:nTrials
-            TrialNames{i} = strkat('Trial ',mat2str(i));
+            TrialNames{i} = ['Trial ' mat2str(i)];
         end
         
         % clear the trial menu
@@ -1458,7 +1454,7 @@ end
         % get sequence
         if  get(RandomizeControl,'Value') == 5
             CustomSequence = inputdlg('Enter sequence of paradigms in program:','Choose custom sequence');
-            set(Konsole,'string',strkat('This custom programme of the following pradigms configured: ',CustomSequence{1}))
+            set(Konsole,'string',['This custom programme of the following paradigms configured:' CustomSequence{1}])
         end
         
     end
@@ -1528,13 +1524,12 @@ end
                 t=toc;
                 if t < 2
                     % programme just started
-                    ks = strkat('Running inter-trial function....');
+                    ks = 'Running inter-trial function....';
                 else
                     tt=(t/(sequence_step-1))*length(sequence) - t; % time remaining
                     tt=oval(tt,2);
                     t=oval(toc,2);
-                    ks = strkat('Running inter-trial function....','\n','Elapsed time is :', (t), 'seconds'...
-                   ,'\n',(tt),'seconds remain');
+                    ks = ['Running inter-trial function....' char(10) 'Elapsed time is :' t 'seconds' tt 'seconds remain'];
                 end
 
                 % start scopes
@@ -1641,7 +1636,7 @@ end
             
         end
         if Trials(get(ParadigmListDisplay,'Value'))
-            showthis = strkat(mat2str(Trials(get(ParadigmListDisplay,'Value'))),'  trials recorded on selected Paradigm(s)');
+            showthis = [mat2str(Trials(get(ParadigmListDisplay,'Value')))  'trials recorded on selected Paradigm(s)'];
             set(Konsole,'String',showthis)
         else
             % no trials on this paradigm
@@ -1727,19 +1722,19 @@ end
         if isempty(data)
             % no data at all
             Trials(ThisParadigm) = 1;
-            set(Konsole,'String',strkat('Running Trial: \n','Paradigm: \t \t  ',ControlParadigmList{ThisParadigm},'\n Trial: \t \t ','1'))
+            set(Konsole,'String',['Running Trial' char(10) 'Paradigm:  ' ControlParadigmList{ThisParadigm} char(10) ' Trial:    1'])
         else
             if length(data) < ThisParadigm
             
                 % first trial in this paradigm
                 Trials(ThisParadigm) = 1;
-                set(Konsole,'String',strkat('Running Trial: \n','Paradigm: \t \t  ',ControlParadigmList{ThisParadigm},'\n Trial:\t \t ',mat2str(1)))
+                set(Konsole,'String',['Running Trial:' char(10) 'Paradigm:     ' ControlParadigmList{ThisParadigm} char(10) 'Trial:    ' mat2str(1)])
        
             else
                 sz = [];
                 eval(strcat('sz=size(data(ThisParadigm).',InputChannelNames{UsedInputChannels(1)},');'));
                 Trials(ThisParadigm) = sz(1)+1;
-                set(Konsole,'String',strkat('Running Trial: \n','Paradigm: \t \t  ',ControlParadigmList{ThisParadigm},'\n Trial: \t \t ',mat2str(sz(1)+1)))
+                set(Konsole,'String',['Running Trial:' char(10) 'Paradigm:  ',ControlParadigmList{ThisParadigm} char(10) ' Trial:   ',mat2str(sz(1)+1)])
        
                 
             end
@@ -1946,7 +1941,7 @@ end
         
             OutputChannelNames = temp; clear temp
             set(RunTrialButton,'Enable','on','String','RUN and SAVE');      
-            set(Konsole,'String',strkat('Trial ',mat2str(Trials(ThisParadigm)),'/Paradigm ',mat2str(ThisParadigm),' completed.'));
+            set(Konsole,'String',['Trial ' mat2str(Trials(ThisParadigm)) '/Paradigm ' mat2str(ThisParadigm) ' completed.']);
         end
         
         
