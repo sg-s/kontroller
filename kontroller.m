@@ -67,7 +67,7 @@
 
 
 function [data] = kontroller(varargin)
-VersionName = 'kontroller v_135_';
+VersionName = 'kontroller v_136_';
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -1732,7 +1732,7 @@ end
        
             else
                 temp = fieldnames(data);
-                sz = size(getfield(data,temp{1}));
+                sz = size(data(ThisParadigm).(temp{1}),1);
                 Trials(ThisParadigm) = sz(1)+1;
                 set(Konsole,'String',['Running Trial:' char(10) 'Paradigm:  ',ControlParadigmList{ThisParadigm} char(10) ' Trial:   ',mat2str(sz(1)+1)])
        
