@@ -1670,7 +1670,7 @@ end
             set(gca,'XLim',[0 max(t)])
             title(ocn{vi},'FontSize',20,'Interpreter','none')
         end
-        prettyFig('EqualiseY =1;','fs=18;')
+        prettyFig('EqualiseY',true,'fs',18)
         
     end
 
