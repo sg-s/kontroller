@@ -40,14 +40,15 @@ end
 for i = 1:length(plothere)
     if FilterState(i)
         % filter the data
-        filtered_trace = bandPass(data(plotthese(i),:),100,10);
+        try
+            filtered_trace = bandPass(data(plotthese(i),:),100,10);
+        catch
+            filtered_trace = data(plotthese(i),:);
+        end
         set(PlotHandles(i),'XData',time,'YData',filtered_trace,'Color',[1 0 0]);
     else
         set(PlotHandles(i),'XData',time,'YData',data(plotthese(i),:),'Color',[0 0 0]);
     end
-
-
-    %set(PlotHandles(i),'XData',time,'YData',data(plotthese(i),:));
 end
 
 
