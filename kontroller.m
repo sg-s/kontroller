@@ -67,7 +67,33 @@
 
 
 function [data] = kontroller(varargin)
-VersionName = 'kontroller v_136_';
+
+
+% get git build_number for all toolboxes
+toolboxes = {'srinivas.gs_mtools','kontroller'};
+if online
+    for i = 1:length(toolboxes)
+        try
+            [~,p]=searchPath(toolboxes{i});
+            build_number = str2double(fileread([p oss 'build_number']));
+            v = checkForNewestVersionOnGitHub(['/sg-s/' toolboxes{i}]);
+            if v > build_number
+                disp(['A new version of' toolboxes{i} 'is available: build:' oval(v)])
+                disp(['You have build ' oval(build_number)])
+                disp('Update using "install -f sg-s/spikesort"')
+            else
+                disp(['You have the latest version of ' toolboxes{i}])
+            end
+        catch
+            error('Missing toolboxes? Try updating and re-installing all toolboxes.')
+        end
+    end
+else
+    warning('Could not check for updates.')
+end
+VersionName = strcat('kontroller (Build-',oval(build_number),')'); 
+
+
 %% validate inputs
 gui = 0;
 demo_mode = 0;
@@ -110,28 +136,9 @@ else
 end
 clear j
 
-
-% check for internal dependencies
-dependencies = {'oval','prettyFig','checkForNewestVersionOnGitHub'};
-for ii = 1:length(dependencies)
-    if exist(dependencies{ii}) ~= 2
-        error('kontroller is missing an external function that it needs to run. You can download it <a href="https://github.com/sg-s/srinivas.gs_mtools">here.</a>')
-    end
-end
-clear ii
-
-% check for new version of kontroller
 if gui
     wh = SplashScreen( 'kontroller', 'title.png','ProgressBar', 'on','ProgressPosition', 5, 'ProgressRatio', 0.1 );
     wh.addText( 30, 50, 'kontroller is starting...', 'FontSize', 20, 'Color', 'k' );
-    if online
-        wh.ProgressRatio  =0.2;
-        if checkForNewestVersionOnGitHub('kontroller',mfilename,VersionName);
-            disp('You can update kontroller using "install -f kontroller"')
-        end
-    else
-        disp('Could not check for updates.')
-    end
     
     % see if wecam support exists
     if verLessThan('matlab','8.3')
