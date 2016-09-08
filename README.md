@@ -51,8 +51,8 @@ The recommended way to install `kontroller` is to use my package manager:
 ```matlab
 % copy and paste this into your MATLAB prompt
 urlwrite('http://srinivas.gs/install.m','install.m'); 
-install kontroller
-install srinivas.gs_mtools
+install sg-s/kontroller
+install sg-s/srinivas.gs_mtools
 ```
 if you have [git](http://www.git-scm.com/) installed, you can 
 
