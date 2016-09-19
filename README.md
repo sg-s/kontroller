@@ -65,5 +65,5 @@ and don't forget to add these folders to your `MATLAB path`
 
 # License
 
-[GPL v2](http://choosealicense.com/licenses/gpl-2.0/#)
+[GPL v3](http://gplv3.fsf.org/)
 
