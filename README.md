@@ -6,9 +6,9 @@
 
 **a free wrapper for MATLAB DAQ to make experiments easier**
 
-Kontroller is a free wrapper for MATLAB's DAQ toolbox that makes it very easy to begin doing experiments. Spend less time writing code and more time doing real science. 
+Kontroller is a free wrapper for MATLAB's DAQ toolbox that makes it easy to begin doing experiments. Spend less time writing code and more time doing real science. I don't know of a simpler solution that lets you get started with your experiments. If you know of one, please [write to me](http://srinivas.gs/#contact).
 
-## Features
+# Features
 
 ### Click-and-Type Setup
 
@@ -33,7 +33,7 @@ Record continuous analogue data while writing predefined vectors to analogue or 
 
 ### Oscilloscope
 
-Don't want to record data but just see what your data stream looks like? A handy scope function looks at live data without recording anything.
+Don't want to record data but just see what your data stream looks like? A handy scope function looks at live data without recording anything. You can throw away that clunky Tektronik that's been hogging space on your ephys rack. 
 
 
 ### Automation 
@@ -44,7 +44,7 @@ Don't want to record data but just see what your data stream looks like? A handy
 
 `kontroller` is fully programmable, and can be used as a command line tool for more complex tasks. 
 
-## Installation
+# Installation
 
 The recommended way to install `kontroller` is to use my package manager:
 
@@ -62,6 +62,18 @@ git clone https://github.com/sg-s/kontroller
 git clone https://github.com/sg-s/srinivas.gs_mtools 
 ```
 and don't forget to add these folders to your `MATLAB path`
+
+# Roadmap and future
+
+`kontroller` will not be developed further, apart from bug fixes. [kontroller2](https://github.com/sg-s/kontroller) is an exciting new object-oriented successor to `kontroller`, which will extend `kontroller`'s capabilities in many ways. 
+
+# Citing
+
+If you use `kontroller`, please [write to me](http://srinivas.gs/#contact)! 
+
+The following publications have used `kontroller`:
+
+1. [Presynaptic GABA Receptors Mediate Temporal Contrast Enhancement in Drosophila Olfactory Sensory Neurons and Modulate Odor-Driven Behavioral Kinetics](http://eneuro.org/content/3/4/ENEURO.0080-16.2016.abstract)
 
 # License
 

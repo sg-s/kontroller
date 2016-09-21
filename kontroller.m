@@ -78,9 +78,9 @@ if online
             build_number = str2double(fileread([p oss 'build_number']));
             v = checkForNewestVersionOnGitHub(['/sg-s/' toolboxes{i}]);
             if v > build_number
-                disp(['A new version of' toolboxes{i} ' is available: build' oval(v)])
+                disp(['A new version of ' toolboxes{i} ' is available: build' oval(v)])
                 disp(['You have build ' oval(build_number)])
-                disp('Update using "install -f sg-s/spikesort"')
+                disp(['Update using "install -f sg-s/' toolboxes{i} '"'])
             else
                 disp(['You have the latest version of ' toolboxes{i} '-build' oval(build_number)])
             end
