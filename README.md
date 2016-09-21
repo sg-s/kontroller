@@ -65,7 +65,7 @@ and don't forget to add these folders to your `MATLAB path`
 
 # Roadmap and future
 
-`kontroller` will not be developed further, apart from bug fixes. [kontroller2](https://github.com/sg-s/kontroller) is an exciting new object-oriented successor to `kontroller`, which will extend `kontroller`'s capabilities in many ways. 
+`kontroller` will not be developed further, apart from bug fixes. [kontroller2](https://github.com/sg-s/kontroller2) is an exciting new object-oriented successor to `kontroller`, which will extend `kontroller`'s capabilities in many ways. 
 
 # Citing
 

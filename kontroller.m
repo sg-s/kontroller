@@ -71,27 +71,8 @@ function [data] = kontroller(varargin)
 
 % get git build_number for all toolboxes
 toolboxes = {'srinivas.gs_mtools','kontroller'};
-if online
-    for i = 1:length(toolboxes)
-        try
-            [~,p]=searchPath(toolboxes{i});
-            build_number = str2double(fileread([p oss 'build_number']));
-            v = checkForNewestVersionOnGitHub(['/sg-s/' toolboxes{i}]);
-            if v > build_number
-                disp(['A new version of ' toolboxes{i} ' is available: build' oval(v)])
-                disp(['You have build ' oval(build_number)])
-                disp(['Update using "install -f sg-s/' toolboxes{i} '"'])
-            else
-                disp(['You have the latest version of ' toolboxes{i} '-build' oval(build_number)])
-            end
-        catch
-            error('Missing toolboxes? Try updating and re-installing all toolboxes.')
-        end
-    end
-else
-    warning('Could not check for updates.')
-end
-VersionName = strcat('kontroller (Build-',oval(build_number),')'); 
+build_numbers = checkDeps(toolboxes);
+VersionName = strcat('Kontroller (Build-',oval(build_numbers(2)),')'); 
 
 
 %% validate inputs
