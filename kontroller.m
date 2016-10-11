@@ -77,10 +77,10 @@ VersionName = strcat('Kontroller (Build-',oval(build_numbers(2)),')');
 
 %% validate inputs
 gui = 0;
-demo_mode = 0;
 RunTheseParadigms = [];
 ControlParadigm = []; % stores the actual control signals for the different control paradigm
-w = 1000; % 1kHz sampling  
+SamplingRate = 1000; % 1kHz sampling  
+
 if nargin == 0 
     % fine.
     gui = 1; % default to showing the GUI
@@ -113,7 +113,6 @@ if ~isempty(j)
 else
     % No DAQ toolbox
     warning('kontroller needs the <a href="http://www.mathworks.com/products/daq/">DAQ toolbox</a> to run, which was not detected. kontroller will now run in demo mode')
-    demo_mode = 1;
 end
 clear j
 
@@ -132,7 +131,7 @@ end
 % check if data directory exists
 if exist('c:\data\','dir') == 7
 else
-    if gui && ~demo_mode
+    if gui 
         disp('kontroller will default to storing recorded data in c:\data. This directory will now be created...')
         mkdir('c:\data\')
     end
@@ -176,7 +175,6 @@ MCDhandle = [];
 ParadigmHandles= [];
 TrialHandles = [];
 ThisParadigm = [];
-SamplingRate = [];
 
 % internal control variables
 MCOutputData = [];
@@ -211,12 +209,8 @@ if gui
     % waitbar(0.3,wh,'Talking to NI DAQ. This may take time...'); figure(wh)
 end
 metadata.DateTime = datestr(now);
-if ~demo_mode
-    d = daq.getDevices;
-else
-    d.ID = 'Demo DAQ';
-    d.Model = 'kontroller Demo';
-end
+d = daq.getDevices;
+
 if length(d) > 1
     UseThisDevice = SelectNIDevice(d);
 elseif length(d) == 0
@@ -240,13 +234,16 @@ set(MetadataTextDisplay,'String',metadatatext);
 set(MetadataTextControl,'String','');
 
 % check to see if sampling rate is stored. 
-if exist('kontroller.SamplingRate.mat','file') == 2
-    load('kontroller.SamplingRate.mat');
-else
-    % default
-    w = 1000;
+if gui
+    if exist('kontroller.SamplingRate.mat','file') == 2
+        load('kontroller.SamplingRate.mat','w')
+        load('kontroller.SamplingRate.mat','SamplingRate')
+        try
+            SamplingRate = w;
+        catch
+        end
+    end
 end
-
 
 %% make the GUI
 if gui
@@ -254,7 +251,7 @@ if gui
     handles.main_figure = figure('Position',[20 60 450 700],'Toolbar','none','Menubar','none','Name',strrep(VersionName,'_',''),'NumberTitle','off','Resize','off','HandleVisibility','on','CloseRequestFcn',@QuitkontrollerCallback);
     WebcamMenu = uimenu(handles.main_figure,'Label','Webcam','Enable','off');
     PreviewWebcamItem = uimenu(WebcamMenu,'Label','Preview','Callback',@PreviewWebcam);
-    wh.ProgressRatio  =0.4;
+    wh.ProgressRatio  = 0.4;
     AnnotateWebcamItem = uimenu(WebcamMenu,'Label','Annotate...','Callback',@LaunchImageAnnotator);
     % waitbar(0.4,wh,'Generating UI...'); figure(wh)
     Konsole = uicontrol('Position',[15 600 425 90],'Style','text','String','kontroller is starting...','FontName','Courier','HorizontalAlignment','left');
@@ -283,11 +280,8 @@ if gui
     RunTrialButton = uicontrol(handles.main_figure,'Position',[320 5 110 50],'Enable','off','BackgroundColor',[0.8 0.9 0.8],'Style','pushbutton','String','RUN w/o saving','FontWeight','bold','Callback',@RunTrial);
 
     FileNameDisplay = uicontrol(handles.main_figure,'Position',[200,60,230,50],'Style','edit','String','No destination file selected','Callback',@SaveToFileTextEdit);
-    if ~demo_mode
-        FileNameSelect = uicontrol(handles.main_figure,'Position',[200,5,100,50],'Style','pushbutton','String','Write to...','Callback',@SelectDestinationCallback);
-    else
-        FileNameSelect = uicontrol(handles.main_figure,'Position',[200,5,100,50],'Style','pushbutton','String','Load data...','Callback',@LoadkontrollerData);
-    end
+    FileNameSelect = uicontrol(handles.main_figure,'Position',[200,5,100,50],'Style','pushbutton','String','Write to...','Callback',@SelectDestinationCallback);
+    
 
     AutomatePanel = uipanel('Title','Automate','FontSize',12,'units','pixels','pos',[205 120 230 200]);
     uicontrol(AutomatePanel,'Style','text','FontSize',8,'String','Repeat selected paradigms','Position',[1 120 100 50])
@@ -307,11 +301,9 @@ if gui
 
     wh.ProgressRatio  =0.5;
     % waitbar(0.5,wh,'Generating global variables...'); figure(wh)
-    if demo_mode
-        StartScopes = uicontrol(handles.main_figure,'Position',[260 465 150 50],'Style','pushbutton','Enable','off','String','Clear Scopes','FontSize',12,'Callback',@ClearScopes);
-    else
-        StartScopes = uicontrol(handles.main_figure,'Position',[260 465 150 50],'Style','pushbutton','Enable','off','String','Start Scopes','FontSize',12,'Callback',@ScopeCallback);
-    end
+
+    StartScopes = uicontrol(handles.main_figure,'Position',[260 465 150 50],'Style','pushbutton','Enable','off','String','Start Scopes','FontSize',12,'Callback',@ScopeCallback);
+
     
     scsz = get(0,'ScreenSize');
     handles.scope_fig = figure('Position',[500 100 scsz(3)-500 scsz(4)-200],'Toolbar','none','Name','Oscilloscope','NumberTitle','off','Resize','on','Visible','off','CloseRequestFcn',@QuitkontrollerCallback); hold on; 
@@ -331,23 +323,17 @@ end
 if ~gui
     disp('Scanning hardware...')
 end
-if ~demo_mode 
-    d = daq.getDevices(); % this line takes a long time when you run it for the first time...
+
+d = daq.getDevices(); % this line takes a long time when you run it for the first time...
+
+
+
+try
+    OutputChannels =  d(UseThisDevice).Subsystems(2).ChannelNames;
+catch
+    error('Something went wrong when trying to talk to the NI device. This is probably because it is not plugged in properly. Try restarting the DAQ, and restart kontroller.')
 end
 
-if ~demo_mode
-    try
-        OutputChannels =  d(UseThisDevice).Subsystems(2).ChannelNames;
-    catch
-        error('Something went wrong when trying to talk to the NI device. This is probably because it is not plugged in properly. Try restarting the DAQ, and restart kontroller.')
-    end
-else
-    OutputChannels = {'ao0','ao1','ao2','ao3'};
-    d.Subsystems(1).ChannelNames = {'ai0','ai1','ai2','ai3','ai4','ai5','ai6','ai7','ai8','ai9','ai10','ai11'};
-    d.Subsystems(2).ChannelNames = {'di0','di1'};
-    d.Subsystems(3).ChannelNames = {'do0','do1','do2','do3','do4','do5','do6','do7'};
-    d.Vendor.FullName = 'kontroller Demo';
-end
 nOutputChannels = length(OutputChannels);
 InputChannels =  d(UseThisDevice).Subsystems(1).ChannelNames;
 nInputChannels = length(InputChannels);
@@ -540,47 +526,6 @@ end
         end
     end
 
-
-%% load saved data
-    function [] = LoadkontrollerData(~,~)
-        [FileName,PathName] = uigetfile('.mat');
-        if ~FileName
-            return
-        end
-        load_waitbar = waitbar(0.2, 'Loading data...');
-        temp=load(strcat(PathName,FileName));
-        ControlParadigm = temp.ControlParadigm;
-        data = temp.data;
-        SamplingRate = temp.SamplingRate;
-        OutputChannelNames = temp.OutputChannelNames;
-        try
-            metadata = temp.metadata;
-            timestamps = temp.timestamps;
-        catch
-        end
-        clear temp
-
-        waitbar(0.4, load_waitbar,'Setting i/o channels...');
-        % update input and output channels
-        set(PlotInputs,'String',fieldnames(data))
-        PlotInputsList = fieldnames(data);
-
-        set(PlotOutputs,'String',OutputChannelNames)
-        PlotOutputsList = OutputChannelNames;
-
-        % enable paradigm and trial menus
-        set(ParadigmMenu,'Enable','on')
-        set(TrialMenu,'Enable','on')
-
-        CPNames = {ControlParadigm.Name};
-        ParadigmHandles = zeros(1,length(CPNames));
-        for i = 1:length(CPNames)
-            ParadigmHandles(i) = uimenu(ParadigmMenu,'Label',CPNames{i},'Callback',@SetParadigm);
-        end
-        close(load_waitbar)
-
-
-    end
 
 %%  set paradigm
     function [] = SetParadigm(SelectedParadigm,~)
