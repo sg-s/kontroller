@@ -80,6 +80,7 @@ gui = 0;
 RunTheseParadigms = [];
 ControlParadigm = []; % stores the actual control signals for the different control paradigm
 SamplingRate = 1000; % 1kHz sampling  
+w = SamplingRate;
 
 if nargin == 0 
     % fine.
