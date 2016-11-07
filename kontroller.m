@@ -71,8 +71,8 @@ function [data] = kontroller(varargin)
 
 % get git build_number for all toolboxes
 toolboxes = {'srinivas.gs_mtools','kontroller'};
-build_numbers = checkDeps(toolboxes);
-VersionName = strcat('Kontroller (Build-',oval(build_numbers(2)),')'); 
+[build_numbers,req_update] = checkDeps(toolboxes);
+VersionName = strcat('kontroller (build-',oval(build_numbers(2)),')'); 
 
 
 %% validate inputs
@@ -2031,6 +2031,13 @@ end
           case 'No'
           return 
        end
+
+       % trigger an auto-update if needed
+        for i = 1:length(toolboxes)
+            if req_update(i) 
+                install('-f',['sg-s/' toolboxes{i}])
+            end
+        end
     end
 
 %% clean up when quitting Manual Control
