@@ -30,7 +30,7 @@
 % scopes" to look at your input live. 
 % 9. If you want to run a trial, choose a control paradigm from the paradigm list
 % and press "run"
-% 10. kontroller will save all data as .mat files in c:\data\
+% 10. kontroller will save all data as .kontroller files in c:\data\
 %
 % === 2. Advanced Use: ControlParadigms ===
 %
@@ -1328,7 +1328,7 @@ end
 
 %% select destintion callback
     function [] = SelectDestinationCallback(~,~)
-        temp=strcat(datestr(now,'yyyy_mm_dd'),'_customname.mat');
+        temp=strcat(datestr(now,'yyyy_mm_dd'),'_customname.kontroller');
         SaveToFile=uiputfile(strcat('C:\data\',temp));
         % activate the run buttons
         if length(get(ParadigmListDisplay,'Value')) == 1
@@ -1871,7 +1871,7 @@ end
             SamplingRate= str2double(get(SamplingRateControl,'String'));
             temp = OutputChannelNames;
             OutputChannelNames = {OutputChannelNames{UsedOutputChannels} DigitalOutputChannelNames{UsedDigitalOutputChannels}};
-            save(strcat('C:\data\',SaveToFile),'data','ControlParadigm','metadata','OutputChannelNames','SamplingRate','timestamps');       
+            save(strcat('C:\data\',SaveToFile),'data','ControlParadigm','metadata','OutputChannelNames','SamplingRate','timestamps','-mat');       
         
             OutputChannelNames = temp; clear temp
             set(RunTrialButton,'Enable','on','String','RUN and SAVE');      
