@@ -1871,7 +1871,7 @@ end
             SamplingRate= str2double(get(SamplingRateControl,'String'));
             temp = OutputChannelNames;
             OutputChannelNames = {OutputChannelNames{UsedOutputChannels} DigitalOutputChannelNames{UsedDigitalOutputChannels}};
-            save(strcat('C:\data\',SaveToFile),'data','ControlParadigm','metadata','OutputChannelNames','SamplingRate','timestamps','-mat');       
+            save(strcat('C:\data\',SaveToFile),'data','ControlParadigm','metadata','OutputChannelNames','SamplingRate','timestamps','-mat','-v7.3');       
         
             OutputChannelNames = temp; clear temp
             set(RunTrialButton,'Enable','on','String','RUN and SAVE');      
