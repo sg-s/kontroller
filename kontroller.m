@@ -70,9 +70,13 @@ function [data] = kontroller(varargin)
 
 
 % get git build_number for all toolboxes
-toolboxes = {'srinivas.gs_mtools','kontroller'};
-[build_numbers,req_update] = checkDeps(toolboxes);
-VersionName = strcat('kontroller (build-',oval(build_numbers(2)),')'); 
+if ~nargin
+    toolboxes = {'srinivas.gs_mtools','kontroller'};
+    [build_numbers,req_update] = checkDeps(toolboxes);
+    VersionName = strcat('kontroller (build-',oval(build_numbers(2)),')'); 
+end
+toolboxes = [];
+VersionName = 'kontroller';
 
 
 %% validate inputs
