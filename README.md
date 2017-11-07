@@ -1,6 +1,6 @@
 # kontroller
 
-[![GitHub last commit](https://img.shields.io/github/last-commit/sg-s/procrustes.svg)]()
+[![GitHub last commit](https://img.shields.io/github/last-commit/sg-s/kontroller.svg)]()
 
 ![](title.png)
 
