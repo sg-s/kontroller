@@ -72,8 +72,6 @@ function [data] = kontroller(varargin)
 % get git build_number for all toolboxes
 if ~nargin
     toolboxes = {'srinivas.gs_mtools','kontroller'};
-    [build_numbers,req_update] = checkDeps(toolboxes);
-    VersionName = strcat('kontroller (build-',oval(build_numbers(2)),')'); 
 end
 toolboxes = [];
 VersionName = 'kontroller';
@@ -964,7 +962,7 @@ end
             MCOutputData(:,k) = thisvalue;
               
             % now update the text edit value to reflect this
-            set(MCNumoi(k),'String',oval(thisvalue,2))
+            set(MCNumoi(k),'String',strlib.oval(thisvalue,2))
         else
              error('What is being changed here? Something seriously wrong in Manual Control Callbacks.')
         end
@@ -1465,8 +1463,8 @@ end
                     ks = 'Running inter-trial function....';
                 else
                     tt=(t/(sequence_step-1))*length(sequence) - t; % time remaining
-                    tt=oval(tt,2);
-                    t=oval(toc,2);
+                    tt=strlib.oval(tt,2);
+                    t=strlib.oval(toc,2);
                     ks = ['Running inter-trial function....' char(10) 'Elapsed time is :' t 'seconds' tt 'seconds remain'];
                 end
 
