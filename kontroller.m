@@ -227,7 +227,7 @@ if ispc
 else
     [~,metadata.ComputerName] = system('hostname');
 end
-metadata.SessionName = randomString(10);
+metadata.SessionName = strlib.rand(10);
 fn = fieldnames(metadata);
 for i = 1:length(fn)
     metadatatext{i} = strcat(fn{i},' : ',mat2str(getfield(metadata,fn{i}))); %#ok<AGROW>
